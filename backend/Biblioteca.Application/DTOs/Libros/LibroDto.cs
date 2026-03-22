@@ -2,9 +2,12 @@ namespace Biblioteca.Application.DTOs.Libros;
 
 public sealed record LibroDto(
     Guid Id,
-    string Titulo,
-    string Autor,
-    string Isbn,
-    int Stock,
-    DateTime FechaRegistro,
-    bool Disponible);
+    string Title,
+    string? Subtitle,
+    string? Isbn,
+    string? Publisher,
+    short? PublicationYear,
+    string? Edition,
+    string Language,
+    DateTime CreatedAt,
+    DateTime UpdatedAt);

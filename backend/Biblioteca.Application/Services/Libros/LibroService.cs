@@ -24,15 +24,22 @@ public sealed class LibroService(
 
     public async Task<LibroDto> CreateAsync(CreateLibroRequest request, CancellationToken cancellationToken)
     {
+        var now = dateTimeProvider.UtcNow;
+
         var libro = new Libro
         {
             Id = Guid.NewGuid(),
-            Titulo = request.Titulo.Trim(),
-            Autor = request.Autor.Trim(),
-            Isbn = request.Isbn.Trim(),
-            Stock = request.Stock,
-            FechaRegistro = dateTimeProvider.UtcNow,
-            Disponible = request.Stock > 0
+            Title = request.Title.Trim(),
+            Subtitle = string.IsNullOrWhiteSpace(request.Subtitle) ? null : request.Subtitle.Trim(),
+            Isbn = string.IsNullOrWhiteSpace(request.Isbn) ? null : request.Isbn.Trim(),
+            Publisher = string.IsNullOrWhiteSpace(request.Publisher) ? null : request.Publisher.Trim(),
+            PublicationYear = request.PublicationYear,
+            Edition = string.IsNullOrWhiteSpace(request.Edition) ? null : request.Edition.Trim(),
+            Language = string.IsNullOrWhiteSpace(request.Language) ? "es" : request.Language.Trim(),
+            SummaryJson = string.IsNullOrWhiteSpace(request.SummaryJson) ? null : request.SummaryJson.Trim(),
+            MetadataJson = string.IsNullOrWhiteSpace(request.MetadataJson) ? null : request.MetadataJson.Trim(),
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         var createdLibro = await libroRepository.AddAsync(libro, cancellationToken);

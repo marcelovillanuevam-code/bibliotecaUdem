@@ -9,22 +9,22 @@ public sealed class LibroRepository(BibliotecaDbContext dbContext) : ILibroRepos
 {
     public async Task<IReadOnlyCollection<Libro>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await dbContext.Libros
+        return await dbContext.Books
             .AsNoTracking()
-            .OrderBy(libro => libro.Titulo)
+            .OrderBy(libro => libro.Title)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Libro?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await dbContext.Libros
+        return await dbContext.Books
             .AsNoTracking()
             .FirstOrDefaultAsync(libro => libro.Id == id, cancellationToken);
     }
 
     public async Task<Libro> AddAsync(Libro libro, CancellationToken cancellationToken)
     {
-        dbContext.Libros.Add(libro);
+        dbContext.Books.Add(libro);
         await dbContext.SaveChangesAsync(cancellationToken);
         return libro;
     }

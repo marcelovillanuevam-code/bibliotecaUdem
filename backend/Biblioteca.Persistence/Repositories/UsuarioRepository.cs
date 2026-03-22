@@ -9,22 +9,22 @@ public sealed class UsuarioRepository(BibliotecaDbContext dbContext) : IUsuarioR
 {
     public async Task<IReadOnlyCollection<Usuario>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await dbContext.Usuarios
+        return await dbContext.Users
             .AsNoTracking()
-            .OrderBy(usuario => usuario.NombreCompleto)
+            .OrderBy(usuario => usuario.Username)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Usuario?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await dbContext.Usuarios
+        return await dbContext.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(usuario => usuario.Id == id, cancellationToken);
     }
 
     public async Task<Usuario> AddAsync(Usuario usuario, CancellationToken cancellationToken)
     {
-        dbContext.Usuarios.Add(usuario);
+        dbContext.Users.Add(usuario);
         await dbContext.SaveChangesAsync(cancellationToken);
         return usuario;
     }

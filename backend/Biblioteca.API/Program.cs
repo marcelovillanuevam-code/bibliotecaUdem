@@ -3,8 +3,14 @@ using Biblioteca.API.Middlewares;
 using Biblioteca.Application;
 using Biblioteca.Infrastructure;
 using Biblioteca.Persistence;
+using Microsoft.Extensions.Logging.EventLog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (OperatingSystem.IsWindows())
+{
+    builder.Logging.AddFilter<EventLogLoggerProvider>(_ => false);
+}
 
 builder.Services
     .AddApiConfiguration()

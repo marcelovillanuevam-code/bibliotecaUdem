@@ -5,15 +5,14 @@ namespace Biblioteca.Application.DTOs.Usuarios;
 public sealed class CreateUsuarioRequest
 {
     [Required]
-    [StringLength(120)]
-    public string NombreCompleto { get; init; } = string.Empty;
+    [StringLength(100, MinimumLength = 3)]
+    public string Username { get; init; } = string.Empty;
 
-    [Required]
-    [EmailAddress]
-    [StringLength(160)]
-    public string Email { get; init; } = string.Empty;
+    [StringLength(30)]
+    public string StatusCode { get; init; } = "pending_verification";
 
-    [Required]
-    [StringLength(20)]
-    public string Matricula { get; init; } = string.Empty;
+    [StringLength(10)]
+    public string PreferredLocale { get; init; } = "es_MX";
+
+    public string? MetadataJson { get; init; }
 }

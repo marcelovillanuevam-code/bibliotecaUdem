@@ -1,18 +1,6 @@
-CREATE TABLE IF NOT EXISTS usuarios (
-    id UUID PRIMARY KEY,
-    nombre_completo VARCHAR(120) NOT NULL,
-    email VARCHAR(160) NOT NULL UNIQUE,
-    matricula VARCHAR(20) NOT NULL UNIQUE,
-    fecha_registro TIMESTAMPTZ NOT NULL,
-    activo BOOLEAN NOT NULL
+﻿CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
 );
 
-CREATE TABLE IF NOT EXISTS libros (
-    id UUID PRIMARY KEY,
-    titulo VARCHAR(150) NOT NULL,
-    autor VARCHAR(120) NOT NULL,
-    isbn VARCHAR(17) NOT NULL UNIQUE,
-    stock INTEGER NOT NULL,
-    fecha_registro TIMESTAMPTZ NOT NULL,
-    disponible BOOLEAN NOT NULL
-);

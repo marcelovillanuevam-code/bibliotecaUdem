@@ -8,40 +8,63 @@ public sealed class LibroConfig : IEntityTypeConfiguration<Libro>
 {
     public void Configure(EntityTypeBuilder<Libro> builder)
     {
-        builder.ToTable("libros");
+        builder.ToTable("books");
 
         builder.HasKey(libro => libro.Id);
 
         builder.Property(libro => libro.Id)
             .HasColumnName("id");
 
-        builder.Property(libro => libro.Titulo)
-            .HasColumnName("titulo")
-            .HasMaxLength(150)
+        builder.Property(libro => libro.Title)
+            .HasColumnName("title")
+            .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(libro => libro.Autor)
-            .HasColumnName("autor")
-            .HasMaxLength(120)
-            .IsRequired();
+        builder.Property(libro => libro.Subtitle)
+            .HasColumnName("subtitle")
+            .HasMaxLength(500);
 
         builder.Property(libro => libro.Isbn)
             .HasColumnName("isbn")
-            .HasMaxLength(17)
+            .HasMaxLength(50);
+
+        builder.Property(libro => libro.Publisher)
+            .HasColumnName("publisher")
+            .HasMaxLength(255);
+
+        builder.Property(libro => libro.PublicationYear)
+            .HasColumnName("publication_year");
+
+        builder.Property(libro => libro.Edition)
+            .HasColumnName("edition")
+            .HasMaxLength(100);
+
+        builder.Property(libro => libro.Language)
+            .HasColumnName("language")
+            .HasMaxLength(50)
+            .HasDefaultValue("es")
             .IsRequired();
 
-        builder.Property(libro => libro.Stock)
-            .HasColumnName("stock")
+        builder.Property(libro => libro.SummaryJson)
+            .HasColumnName("summary")
+            .HasColumnType("jsonb");
+
+        builder.Property(libro => libro.MetadataJson)
+            .HasColumnName("metadata")
+            .HasColumnType("jsonb");
+
+        builder.Property(libro => libro.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
             .IsRequired();
 
-        builder.Property(libro => libro.FechaRegistro)
-            .HasColumnName("fecha_registro")
-            .IsRequired();
-
-        builder.Property(libro => libro.Disponible)
-            .HasColumnName("disponible")
+        builder.Property(libro => libro.UpdatedAt)
+            .HasColumnName("updated_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
             .IsRequired();
 
         builder.HasIndex(libro => libro.Isbn).IsUnique();
+        builder.HasIndex(libro => libro.Title).HasDatabaseName("idx_books_title");
+        builder.HasIndex(libro => libro.Isbn).HasDatabaseName("idx_books_isbn");
     }
 }

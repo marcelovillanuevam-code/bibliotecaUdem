@@ -24,14 +24,17 @@ public sealed class UsuarioService(
 
     public async Task<UsuarioDto> CreateAsync(CreateUsuarioRequest request, CancellationToken cancellationToken)
     {
+        var now = dateTimeProvider.UtcNow;
+
         var usuario = new Usuario
         {
             Id = Guid.NewGuid(),
-            NombreCompleto = request.NombreCompleto.Trim(),
-            Email = request.Email.Trim(),
-            Matricula = request.Matricula.Trim(),
-            FechaRegistro = dateTimeProvider.UtcNow,
-            Activo = true
+            Username = request.Username.Trim(),
+            StatusCode = string.IsNullOrWhiteSpace(request.StatusCode) ? "pending_verification" : request.StatusCode.Trim(),
+            PreferredLocale = string.IsNullOrWhiteSpace(request.PreferredLocale) ? "es_MX" : request.PreferredLocale.Trim(),
+            MetadataJson = string.IsNullOrWhiteSpace(request.MetadataJson) ? null : request.MetadataJson.Trim(),
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         var createdUsuario = await usuarioRepository.AddAsync(usuario, cancellationToken);

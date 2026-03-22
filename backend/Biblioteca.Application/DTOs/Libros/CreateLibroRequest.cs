@@ -5,17 +5,27 @@ namespace Biblioteca.Application.DTOs.Libros;
 public sealed class CreateLibroRequest
 {
     [Required]
-    [StringLength(150)]
-    public string Titulo { get; init; } = string.Empty;
+    [StringLength(500)]
+    public string Title { get; init; } = string.Empty;
 
-    [Required]
-    [StringLength(120)]
-    public string Autor { get; init; } = string.Empty;
+    [StringLength(500)]
+    public string? Subtitle { get; init; }
 
-    [Required]
-    [StringLength(17)]
-    public string Isbn { get; init; } = string.Empty;
+    [StringLength(50)]
+    public string? Isbn { get; init; }
 
-    [Range(0, 999)]
-    public int Stock { get; init; }
+    [StringLength(255)]
+    public string? Publisher { get; init; }
+
+    [Range(0, 32767)]
+    public short? PublicationYear { get; init; }
+
+    [StringLength(100)]
+    public string? Edition { get; init; }
+
+    [StringLength(50)]
+    public string Language { get; init; } = "es";
+
+    public string? SummaryJson { get; init; }
+    public string? MetadataJson { get; init; }
 }

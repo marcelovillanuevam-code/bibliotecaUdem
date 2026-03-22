@@ -9,19 +9,23 @@ public static class EntityMappings
     public static UsuarioDto ToDto(this Usuario usuario) =>
         new(
             usuario.Id,
-            usuario.NombreCompleto,
-            usuario.Email,
-            usuario.Matricula,
-            usuario.FechaRegistro,
-            usuario.Activo);
+            usuario.Username,
+            usuario.StatusCode,
+            usuario.PreferredLocale,
+            usuario.CreatedAt,
+            usuario.UpdatedAt,
+            usuario.DeletedAt);
 
     public static LibroDto ToDto(this Libro libro) =>
         new(
             libro.Id,
-            libro.Titulo,
-            libro.Autor,
+            libro.Title,
+            libro.Subtitle,
             libro.Isbn,
-            libro.Stock,
-            libro.FechaRegistro,
-            libro.Disponible);
+            libro.Publisher,
+            libro.PublicationYear,
+            libro.Edition,
+            libro.Language,
+            libro.CreatedAt,
+            libro.UpdatedAt);
 }
