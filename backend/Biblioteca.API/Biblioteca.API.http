@@ -1,0 +1,11 @@
+@Biblioteca.API_HostAddress = https://localhost:7115
+
+GET {{Biblioteca.API_HostAddress}}/api/usuarios
+Accept: application/json
+
+###
+
+GET {{Biblioteca.API_HostAddress}}/api/libros
+Accept: application/json
+
+###
