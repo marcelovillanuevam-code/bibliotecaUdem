@@ -9,5 +9,7 @@ public sealed record LibroDto(
     short? PublicationYear,
     string? Edition,
     string Language,
+    IReadOnlyCollection<LibroAutorDto> Authors,
+    IReadOnlyCollection<LibroMateriaDto> Subjects,
     DateTime CreatedAt,
     DateTime UpdatedAt);

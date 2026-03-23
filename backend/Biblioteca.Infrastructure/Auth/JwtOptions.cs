@@ -15,4 +15,7 @@ public sealed class JwtOptions
     [Required]
     [MinLength(32)]
     public string SecretKey { get; init; } = string.Empty;
+
+    [Range(1, 1440)]
+    public int ExpiresInMinutes { get; init; } = 60;
 }

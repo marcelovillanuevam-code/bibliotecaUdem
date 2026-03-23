@@ -1,9 +1,8 @@
-#ESTO ES UNA PLANTILLA LOS PROMPTS DEBEN LLEVAR ESTA ESTRUCTURA
 
 CONTEXTO:
 Proyecto: Biblioteca UDEM
 (ver docs/project_context.md)
-
+(referenciar documentos en docs/)
 Stack:
 - ASP.NET Core 10
 - Angular
@@ -26,12 +25,11 @@ Convenciones:
 ---
 
 TAREA:
-(Describe aquí lo que quieres)
+Generar endpoints para registro de usuario y login con autenticación 
 
 ---
 
-ARCHIVOS:
-(Lista de archivos que le pasas al modelo)
+
 
 ---
 
@@ -45,6 +43,6 @@ REGLAS:
 ---
 
 SALIDA:
-- Código listo para pegar
+- Código limpio siguiendo lineamientos y estandares
 - Sin explicaciones
 - Separado por archivos si es necesario

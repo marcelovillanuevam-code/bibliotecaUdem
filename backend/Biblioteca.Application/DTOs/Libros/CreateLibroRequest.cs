@@ -28,4 +28,10 @@ public sealed class CreateLibroRequest
 
     public string? SummaryJson { get; init; }
     public string? MetadataJson { get; init; }
+
+    [MinLength(1)]
+    public IReadOnlyCollection<CreateLibroAuthorRequest> Authors { get; init; } = [];
+
+    [MinLength(1)]
+    public IReadOnlyCollection<string> SubjectCodes { get; init; } = [];
 }

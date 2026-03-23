@@ -11,6 +11,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -18,5 +19,20 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <Target Name="InitializeDatabaseOnFirstBuild"
+          AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipDatabaseInitOnBuild)' != 'true' and !Exists('$(BaseIntermediateOutputPath)db-init.done')">
+    <Exec Command="dotnet &quot;$(TargetPath)&quot; --init-db"
+          WorkingDirectory="$(MSBuildProjectDirectory)"
+          IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="DatabaseInitExitCode" />
+    </Exec>
+    <Touch Files="$(BaseIntermediateOutputPath)db-init.done"
+           AlwaysCreate="true"
+           Condition="'$(DatabaseInitExitCode)' == '0'" />
+    <Warning Text="No se pudo inicializar la base automaticamente en el primer build. Verifica Docker/PostgreSQL y arranca la API para que aplique migraciones y seeders."
+             Condition="'$(DatabaseInitExitCode)' != '0'" />
+  </Target>
 
 </Project>

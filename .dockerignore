@@ -1,0 +1,11 @@
+.git
+.vs
+.vscode
+**/bin
+**/obj
+**/node_modules
+**/dist
+docker-compose.override.yml
+*.user
+*.suo
+*.rsuser
