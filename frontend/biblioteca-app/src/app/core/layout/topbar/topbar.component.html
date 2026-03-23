@@ -1,0 +1,41 @@
+<header class="topbar">
+  <div class="topbar__left">
+    <button class="topbar__menu" type="button" (click)="menuToggle.emit()" aria-label="Abrir menu">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 7H20M4 12H20M4 17H14"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+    <div>
+      <p class="topbar__eyebrow">Sistema de Biblioteca</p>
+      <h1>{{ title() }}</h1>
+    </div>
+  </div>
+
+  <div class="topbar__right">
+    <button class="topbar__alert" type="button" aria-label="Notificaciones">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 3C8.68629 3 6 5.68629 6 9V12.5L4 16H20L18 12.5V9C18 5.68629 15.3137 3 12 3Z"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linejoin="round"
+        />
+        <path d="M10 19C10.4 19.8 11.2 20.3 12 20.3C12.8 20.3 13.6 19.8 14 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
+      <span>3</span>
+    </button>
+
+    <div class="topbar__user">
+      <span class="topbar__avatar">{{ user().initials }}</span>
+      <span class="topbar__meta">
+        <strong>{{ user().name }}</strong>
+        <small>{{ user().role }}</small>
+      </span>
+    </div>
+  </div>
+</header>

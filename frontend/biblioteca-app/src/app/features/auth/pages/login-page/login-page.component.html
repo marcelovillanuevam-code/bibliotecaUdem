@@ -1,0 +1,116 @@
+<section class="login-page">
+  <div class="login-page__visual">
+    <div class="login-page__overlay"></div>
+    <div class="login-page__brand">
+      <span class="login-page__seal" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M3 8L12 3L21 8L12 13L3 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+          <path d="M7 10.5V14C7 15.6569 9.23858 17 12 17C14.7614 17 17 15.6569 17 14V10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </span>
+      <div>
+        <p>Universidad</p>
+        <strong>de Monterrey</strong>
+      </div>
+    </div>
+
+    <div class="login-page__copy">
+      <span class="login-page__eyebrow">Sistema institucional</span>
+      <h1>Sistema de Gestion de Biblioteca</h1>
+      <p>
+        Accede al catalogo academico, gestiona usuarios y valida la conexion real
+        entre Angular, JWT y la API del sistema.
+      </p>
+    </div>
+
+    <dl class="login-page__metrics" aria-label="Resumen general del sistema">
+      <div><dt>68+</dt><dd>Libros</dd></div>
+      <div><dt>542</dt><dd>Usuarios</dd></div>
+      <div><dt>41</dt><dd>Disponibles</dd></div>
+    </dl>
+
+    <div class="login-page__footnote">
+      <span class="login-page__dot"></span>
+      <p>Demo conectada a backend local. Google SSO queda pendiente para otro sprint.</p>
+    </div>
+  </div>
+
+  <div class="login-page__panel">
+    <div class="login-page__panel-head">
+      <span class="login-page__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6.5 5.5H10.5C11.3284 5.5 12 6.17157 12 7V19C12 18.1716 11.3284 17.5 10.5 17.5H6.5C5.67157 17.5 5 18.1716 5 19V7C5 6.17157 5.67157 5.5 6.5 5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+          <path d="M13.5 5.5H17.5C18.3284 5.5 19 6.17157 19 7V19C19 18.1716 18.3284 17.5 17.5 17.5H13.5C12.6716 17.5 12 18.1716 12 19V7C12 6.17157 12.6716 5.5 13.5 5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+        </svg>
+      </span>
+      <h2>Bienvenido</h2>
+      <p>Sistema de Biblioteca - UDEM</p>
+    </div>
+
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="login-card__head">
+        <h3 id="login-title">Inicio de sesion institucional</h3>
+        <p>Autenticacion JWT ya conectada a la API local para pruebas de sprint.</p>
+      </div>
+
+      <div class="login-card__demo">
+        <span>Usuario demo:</span>
+        <strong>admin1 / Admin123!</strong>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="login-card__error" role="alert">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form class="login-form" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="login-form__field">
+          <span>Usuario</span>
+          <input
+            type="text"
+            formControlName="username"
+            autocomplete="username"
+            placeholder="admin1"
+            [class.login-form__input--invalid]="hasError('username')"
+          />
+        </label>
+
+        <label class="login-form__field">
+          <span>Contrasena</span>
+          <input
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Admin123!"
+            [class.login-form__input--invalid]="hasError('password')"
+          />
+        </label>
+
+        <button class="login-card__action login-card__action--primary" type="submit" [disabled]="pending()">
+          <span>{{ pending() ? 'Conectando...' : 'Entrar al sistema' }}</span>
+        </button>
+      </form>
+
+      <button class="login-card__secondary" type="button" (click)="fillDemoCredentials()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 6V18M6 12H18M7.5 7.5L16.5 16.5M16.5 7.5L7.5 16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <span>Cargar credenciales demo</span>
+      </button>
+
+      <div class="login-card__notice">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3L19 6V11C19 15.4183 16.134 19.2433 12 20.5C7.86603 19.2433 5 15.4183 5 11V6L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+        </svg>
+        <p>La sesion se guarda en localStorage y las llamadas subsecuentes ya llevan Bearer token.</p>
+      </div>
+
+      <footer class="login-card__footer">
+        <p>Problemas para acceder? <a href="mailto:soporte.biblioteca@udem.edu">Contacta soporte</a></p>
+      </footer>
+    </section>
+
+    <p class="login-page__legal">© 2026 Universidad de Monterrey · Sistema de Biblioteca</p>
+  </div>
+</section>

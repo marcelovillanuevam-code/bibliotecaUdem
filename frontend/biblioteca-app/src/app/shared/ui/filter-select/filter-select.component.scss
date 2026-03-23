@@ -1,0 +1,50 @@
+.filter-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 3.6rem;
+  padding-inline: 1rem 2.85rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  background: white;
+  color: var(--slate-700);
+}
+
+.filter-select:focus-within {
+  border-color: var(--brand-300);
+  box-shadow: var(--focus-ring);
+}
+
+.filter-select__icon,
+.filter-select__chevron {
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  color: var(--slate-400);
+}
+
+.filter-select__icon svg,
+.filter-select__chevron svg {
+  width: 100%;
+  height: auto;
+}
+
+.filter-select__chevron {
+  position: absolute;
+  right: 1rem;
+}
+
+select {
+  min-width: 12rem;
+  border: 0;
+  background: transparent;
+  color: var(--slate-800);
+  font: inherit;
+  appearance: none;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+}

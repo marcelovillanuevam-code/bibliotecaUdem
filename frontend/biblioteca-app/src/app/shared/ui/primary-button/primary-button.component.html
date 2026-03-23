@@ -1,0 +1,10 @@
+<button
+  class="primary-button"
+  [class.primary-button--secondary]="variant() === 'secondary'"
+  [class.primary-button--ghost]="variant() === 'ghost'"
+  [class.primary-button--full]="fullWidth()"
+  [attr.type]="type()"
+  [disabled]="disabled()"
+>
+  <ng-content />
+</button>

@@ -1,0 +1,129 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 5.4rem;
+  padding: 1.15rem 1.6rem;
+  border-bottom: 1px solid var(--line-soft);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+}
+
+.topbar__left,
+.topbar__right,
+.topbar__user {
+  display: flex;
+  align-items: center;
+}
+
+.topbar__left {
+  gap: 1rem;
+}
+
+.topbar__eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--slate-400);
+  font-size: 0.86rem;
+}
+
+h1 {
+  margin: 0;
+  color: var(--slate-950);
+  font-size: clamp(1.3rem, 1.2rem + 0.8vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.topbar__right {
+  gap: 1rem;
+}
+
+.topbar__menu,
+.topbar__alert {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--slate-500);
+  cursor: pointer;
+}
+
+.topbar__menu {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.9rem;
+}
+
+.topbar__menu svg,
+.topbar__alert svg {
+  width: 1.3rem;
+}
+
+.topbar__alert {
+  width: 2.9rem;
+  height: 2.9rem;
+}
+
+.topbar__alert span {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: #ef4a51;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.topbar__avatar {
+  display: grid;
+  place-items: center;
+  width: 2.95rem;
+  height: 2.95rem;
+  border-radius: 50%;
+  background: var(--brand-700);
+  color: white;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.topbar__meta {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 0.85rem;
+}
+
+.topbar__meta strong {
+  color: var(--slate-900);
+  font-size: 0.98rem;
+}
+
+.topbar__meta small {
+  color: var(--slate-400);
+  font-size: 0.88rem;
+}
+
+@media (min-width: 64rem) {
+  .topbar__menu {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .topbar {
+    padding-inline: 1rem;
+  }
+
+  .topbar__meta {
+    display: none;
+  }
+}

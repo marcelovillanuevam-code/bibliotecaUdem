@@ -1,0 +1,28 @@
+<label class="filter-select">
+  <span class="filter-select__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 5H20L14 12V18L10 20V12L4 5Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
+  <select [attr.aria-label]="ariaLabel()" [value]="value()" (change)="onChange($event)">
+    @for (option of options(); track option) {
+      <option [value]="option">{{ option }}</option>
+    }
+  </select>
+  <span class="filter-select__chevron" aria-hidden="true">
+    <svg viewBox="0 0 20 20" fill="none">
+      <path
+        d="M5 7.5L10 12.5L15 7.5"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
+</label>
