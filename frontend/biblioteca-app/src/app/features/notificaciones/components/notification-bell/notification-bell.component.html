@@ -1,0 +1,65 @@
+<div class="notification-bell">
+  <button
+    class="notification-bell__trigger"
+    type="button"
+    aria-label="Notificaciones"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="open()"
+    (click)="toggleOpen()"
+  >
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 3C8.68629 3 6 5.68629 6 9V12.5L4 16H20L18 12.5V9C18 5.68629 15.3137 3 12 3Z"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+      <path d="M10 19C10.4 19.8 11.2 20.3 12 20.3C12.8 20.3 13.6 19.8 14 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+    </svg>
+
+    @if (unreadCount() > 0) {
+      <span>{{ unreadBadge() }}</span>
+    }
+  </button>
+
+  @if (open()) {
+    <section class="notification-bell__menu" role="menu" aria-label="Ultimas notificaciones">
+      <header>
+        <div>
+          <h2>Notificaciones</h2>
+          <p>{{ unreadCount() }} sin leer</p>
+        </div>
+
+        <button type="button" (click)="refresh()" [disabled]="loading()">Actualizar</button>
+      </header>
+
+      @if (errorMessage()) {
+        <div class="notification-bell__state notification-bell__state--error">{{ errorMessage() }}</div>
+      }
+
+      @if (loading() && latestNotifications().length === 0) {
+        <div class="notification-bell__state">Cargando notificaciones...</div>
+      } @else {
+        <div class="notification-bell__list">
+          @for (notification of latestNotifications(); track trackByNotificationId($index, notification)) {
+            <button
+              class="notification-bell__item"
+              [class.notification-bell__item--unread]="notification.status === 'PENDING'"
+              type="button"
+              role="menuitem"
+              (click)="openNotification(notification)"
+              [disabled]="isProcessing(notification)"
+            >
+              <span class="notification-bell__type">{{ typeLabel(notification.type) }}</span>
+              <strong>{{ notification.subject }}</strong>
+              <small>{{ notification.body }}</small>
+              <time>{{ formatTimestamp(notification.createdAt) }}</time>
+            </button>
+          } @empty {
+            <div class="notification-bell__state">No hay notificaciones recientes.</div>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

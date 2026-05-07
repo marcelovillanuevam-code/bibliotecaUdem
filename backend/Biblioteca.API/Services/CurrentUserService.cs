@@ -10,8 +10,12 @@ public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
         get
         {
+            // .NET 8+ JwtBearerHandler mapea "sub" a ClaimTypes.NameIdentifier por defecto.
+            // Se busca primero el nombre mapeado y luego el nombre original como fallback.
             var value = httpContextAccessor.HttpContext?.User
-                .FindFirstValue(JwtRegisteredClaimNames.Sub);
+                            .FindFirstValue(ClaimTypes.NameIdentifier)
+                        ?? httpContextAccessor.HttpContext?.User
+                            .FindFirstValue(JwtRegisteredClaimNames.Sub);
 
             return value is not null && Guid.TryParse(value, out var id) ? id : null;
         }

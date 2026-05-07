@@ -5,5 +5,6 @@ internal static class AuthPolicies
 {
     public const string AdminOnly = "AdminOnly";
     public const string AdminOrLibrarian = "AdminOrLibrarian";
+    public const string TreasuryOrAdmin = "TreasuryOrAdmin";
     public const string Authenticated = "Authenticated";
 }

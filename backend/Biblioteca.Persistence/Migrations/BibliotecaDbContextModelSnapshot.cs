@@ -266,6 +266,115 @@ namespace Biblioteca.Persistence.Migrations
                     b.ToTable("statuses", (string)null);
                 });
 
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Fine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int?>("DaysLate")
+                        .HasColumnType("integer")
+                        .HasColumnName("days_late");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_at");
+
+                    b.Property<Guid?>("PaidByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("paid_by_user_id");
+
+                    b.Property<string>("WaivedReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("waived_reason");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ReturnId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("return_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaidByUserId");
+
+                    b.HasIndex("ReturnId")
+                        .IsUnique()
+                        .HasDatabaseName("idx_fines_return_id");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("idx_fines_user_status");
+
+                    b.ToTable("fines", (string)null);
+
+                    b.HasAnnotation("Npgsql:UseXminAsConcurrencyToken", true);
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.FineConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("DamageFlatMxn")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("damage_flat_mxn");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_from");
+
+                    b.Property<decimal>("LateRatePerDayMxn")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("late_rate_per_day_mxn");
+
+                    b.Property<decimal>("LossFlatMxn")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("loss_flat_mxn");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EffectiveFrom")
+                        .HasDatabaseName("idx_fine_configs_effective_from");
+
+                    b.ToTable("fine_configs", (string)null);
+                });
+
             modelBuilder.Entity("Biblioteca.Domain.Entities.Libro", b =>
                 {
                     b.Property<Guid>("Id")
@@ -388,6 +497,108 @@ namespace Biblioteca.Persistence.Migrations
                     b.ToTable("book_subjects", (string)null);
                 });
 
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Loan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BookCopyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("book_copy_id");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateTime>("DueAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("due_at");
+
+                    b.Property<Guid>("IssuedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issued_by_user_id");
+
+                    b.Property<DateTime>("LoanedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("loaned_at");
+
+                    b.Property<int>("RenewalCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("renewal_count");
+
+                    b.Property<DateTime?>("ReturnedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("returned_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookCopyId")
+                        .IsUnique()
+                        .HasDatabaseName("loans_active_copy_unique")
+                        .HasFilter("status = 'ACTIVE'");
+
+                    b.HasIndex("IssuedByUserId");
+
+                    b.HasIndex("BookCopyId", "Status")
+                        .HasDatabaseName("loans_book_copy_status_idx");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("loans_user_status_idx");
+
+                    b.ToTable("loans", (string)null);
+
+                    b.HasAnnotation("Npgsql:UseXminAsConcurrencyToken", true);
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.LoanRenewal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("LoanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("loan_id");
+
+                    b.Property<DateTime>("NewDueAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("new_due_at");
+
+                    b.Property<DateTime>("PreviousDueAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("previous_due_at");
+
+                    b.Property<DateTime>("RenewedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("renewed_at");
+
+                    b.Property<Guid>("RenewedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("renewed_by_user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoanId")
+                        .HasDatabaseName("idx_loan_renewals_loan_id");
+
+                    b.ToTable("loan_renewals", (string)null);
+                });
+
             modelBuilder.Entity("Biblioteca.Domain.Entities.Materia", b =>
                 {
                     b.Property<Guid>("Id")
@@ -426,6 +637,76 @@ namespace Biblioteca.Persistence.Migrations
                         .HasDatabaseName("idx_subjects_name");
 
                     b.ToTable("subjects", (string)null);
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("channel");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("failure_reason");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload_json");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("subject");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .HasDatabaseName("idx_notifications_status_created_at");
+
+                    b.ToTable("notifications", (string)null);
                 });
 
             modelBuilder.Entity("Biblioteca.Domain.Entities.PerfilUsuario", b =>
@@ -541,6 +822,122 @@ namespace Biblioteca.Persistence.Migrations
                         {
                             t.HasCheckConstraint("chk_audit_logs_action", "action IN ('INSERT', 'UPDATE', 'DELETE')");
                         });
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Reservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("book_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime?>("FulfilledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fulfilled_at");
+
+                    b.Property<Guid?>("FulfilledByLoanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fulfilled_by_loan_id");
+
+                    b.Property<int>("QueuePosition")
+                        .HasColumnType("integer")
+                        .HasColumnName("queue_position");
+
+                    b.Property<DateTime?>("ReadyAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ready_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FulfilledByLoanId");
+
+                    b.HasIndex("UserId", "BookId")
+                        .IsUnique()
+                        .HasDatabaseName("reservations_user_book_active_unique")
+                        .HasFilter("status IN ('PENDING','READY')");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("reservations_user_status_idx");
+
+                    b.HasIndex("BookId", "Status", "QueuePosition")
+                        .HasDatabaseName("reservations_book_status_pos_idx");
+
+                    b.ToTable("reservations", (string)null);
+
+                    b.HasAnnotation("Npgsql:UseXminAsConcurrencyToken", true);
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Return", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("condition");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("InspectionNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("inspection_notes");
+
+                    b.Property<Guid>("LoanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("loan_id");
+
+                    b.Property<Guid>("ReceivedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("received_by_user_id");
+
+                    b.Property<DateTime>("ReturnedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("returned_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoanId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_returns_loan_id");
+
+                    b.HasIndex("ReceivedByUserId");
+
+                    b.ToTable("returns", (string)null);
                 });
 
             modelBuilder.Entity("Biblioteca.Domain.Entities.Rol", b =>
@@ -854,6 +1251,30 @@ namespace Biblioteca.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Fine", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("PaidByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Biblioteca.Domain.Entities.Return", "Return")
+                        .WithOne("Fine")
+                        .HasForeignKey("Biblioteca.Domain.Entities.Fine", "ReturnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Biblioteca.Domain.Entities.Usuario", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Return");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Biblioteca.Domain.Entities.LibroAutor", b =>
                 {
                     b.HasOne("Biblioteca.Domain.Entities.Autor", "Author")
@@ -892,6 +1313,53 @@ namespace Biblioteca.Persistence.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Loan", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Entities.BookCopy", "BookCopy")
+                        .WithMany()
+                        .HasForeignKey("BookCopyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Biblioteca.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("IssuedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Biblioteca.Domain.Entities.Usuario", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BookCopy");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.LoanRenewal", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Entities.Loan", "Loan")
+                        .WithMany("Renewals")
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Entities.Usuario", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Biblioteca.Domain.Entities.PerfilUsuario", b =>
                 {
                     b.HasOne("Biblioteca.Domain.Entities.Usuario", "User")
@@ -901,6 +1369,49 @@ namespace Biblioteca.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Reservation", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Entities.Libro", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Biblioteca.Domain.Entities.Loan", "FulfilledByLoan")
+                        .WithMany()
+                        .HasForeignKey("FulfilledByLoanId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Biblioteca.Domain.Entities.Usuario", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("FulfilledByLoan");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Return", b =>
+                {
+                    b.HasOne("Biblioteca.Domain.Entities.Loan", "Loan")
+                        .WithMany()
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Biblioteca.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("ReceivedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
                 });
 
             modelBuilder.Entity("Biblioteca.Domain.Entities.Sesion", b =>
@@ -974,9 +1485,19 @@ namespace Biblioteca.Persistence.Migrations
                     b.Navigation("Subjects");
                 });
 
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Loan", b =>
+                {
+                    b.Navigation("Renewals");
+                });
+
             modelBuilder.Entity("Biblioteca.Domain.Entities.Materia", b =>
                 {
                     b.Navigation("Books");
+                });
+
+            modelBuilder.Entity("Biblioteca.Domain.Entities.Return", b =>
+                {
+                    b.Navigation("Fine");
                 });
 
             modelBuilder.Entity("Biblioteca.Domain.Entities.Rol", b =>

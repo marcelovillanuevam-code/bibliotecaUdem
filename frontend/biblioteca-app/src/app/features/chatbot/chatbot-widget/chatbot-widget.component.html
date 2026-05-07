@@ -1,0 +1,75 @@
+<div class="chatbot">
+  <!-- Panel -->
+  @if (panelOpen()) {
+    <div class="chatbot__panel" role="dialog" aria-label="Asistente de biblioteca">
+      <div class="chatbot__header">
+        <div class="chatbot__header-info">
+          <span class="chatbot__dot" aria-hidden="true"></span>
+          <span class="chatbot__title">Asistente UDEM</span>
+        </div>
+        <button class="chatbot__close" type="button" (click)="togglePanel()" aria-label="Cerrar asistente">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="chatbot__messages" #messagesEl>
+        @for (msg of messages(); track trackByIndex($index)) {
+          <div class="chatbot__msg" [class.chatbot__msg--user]="msg.role === 'user'" [class.chatbot__msg--bot]="msg.role === 'bot'">
+            <p class="chatbot__msg-text">{{ msg.text }}</p>
+            @if (msg.actions && msg.actions.length > 0) {
+              <div class="chatbot__actions">
+                @for (action of msg.actions; track trackAction($index, action)) {
+                  <button class="chatbot__action-btn" type="button" (click)="navigateTo(action.url)">
+                    {{ action.label }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+        @if (loading()) {
+          <div class="chatbot__msg chatbot__msg--bot chatbot__msg--loading" aria-label="Procesando">
+            <span class="chatbot__dots">
+              <span></span><span></span><span></span>
+            </span>
+          </div>
+        }
+      </div>
+
+      <form class="chatbot__input-row" (submit)="onSubmit($event, msgInput)">
+        <input
+          #msgInput
+          class="chatbot__input"
+          type="text"
+          placeholder="Escribí tu pregunta..."
+          [disabled]="loading()"
+          autocomplete="off"
+          maxlength="500"
+          aria-label="Mensaje al asistente"
+        />
+        <button class="chatbot__send" type="submit" [disabled]="loading()" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  }
+
+  <!-- FAB -->
+  <button class="chatbot__fab" type="button" (click)="togglePanel()" [attr.aria-expanded]="panelOpen()" aria-label="Abrir asistente de biblioteca">
+    @if (panelOpen()) {
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    } @else {
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 17L4 20V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V15C20 16.1046 19.1046 17 18 17H8Z"
+          stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      <span class="chatbot__badge" aria-hidden="true">IA</span>
+    }
+  </button>
+</div>

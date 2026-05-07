@@ -10,6 +10,7 @@ public interface IBookCopyRepository
     Task<IReadOnlyCollection<BookCopy>> GetByBookIdAsync(Guid bookId, CancellationToken cancellationToken);
     Task<bool> BarcodeExistsAsync(string barcode, CancellationToken cancellationToken, Guid? excludedCopyId = null);
     Task<bool> HasActiveCopiesAsync(Guid bookId, CancellationToken cancellationToken);
+    Task<int> CountAvailableByBookIdAsync(Guid bookId, CancellationToken cancellationToken);
     Task<BookCopy> AddAsync(BookCopy copy, CancellationToken cancellationToken);
     Task SaveChangesAsync(CancellationToken cancellationToken);
     void SoftDelete(BookCopy copy);

@@ -34,6 +34,9 @@
 .book-card__actions { flex-wrap: wrap; margin-top: auto; }
 .book-card__actions button, .book-modal__close { border: 0; cursor: pointer; }
 .book-card__actions button { min-height: 2.7rem; padding: 0.75rem 1rem; border-radius: 999px; background: var(--surface-subtle); color: var(--slate-800); font: inherit; font-weight: 700; }
+.book-card__actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+.book-card__actions .book-card__reserve { background: var(--brand-600); color: white; }
+.book-card__actions .book-card__reserve:disabled { background: var(--surface-subtle); color: var(--slate-500); }
 .book-card__actions .book-card__danger { background: rgba(214, 63, 69, 0.1); color: #a23a3f; }
 .books-list__empty { color: var(--slate-500); text-align: center; }
 .book-modal-backdrop { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 1rem; background: rgba(15, 23, 42, 0.36); backdrop-filter: blur(8px); }

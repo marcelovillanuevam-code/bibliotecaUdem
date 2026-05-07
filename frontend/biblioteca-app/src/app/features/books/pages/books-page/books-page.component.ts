@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -8,11 +7,17 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { AuthSessionService } from '../../../../core/services/auth-session.service';
 import { BooksApiService } from '../../../../core/services/books-api.service';
 import { BookCopiesApiService } from '../../../../core/services/book-copies-api.service';
+import { FinesApiService } from '../../../../core/services/fines-api.service';
+import { ReservationsApiService } from '../../../../core/services/reservations-api.service';
 import { BookDetail, BookFilters, BookRecord, BookSaveRequest } from '../../../../shared/models/book.model';
+import { resolveHttpError } from '../../../../shared/utils/http-error';
 import { BookCopy, BookCopyCondition, BookCopySaveRequest, BookCopyStatus, BookCopyUpdateRequest } from '../../../../shared/models/book-copy.model';
+import { Reservation } from '../../../../shared/models/reservation.model';
 import { PrimaryButtonComponent } from '../../../../shared/ui/primary-button/primary-button.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 
@@ -71,7 +76,7 @@ function noWhitespaceOnly(control: AbstractControl<string>): ValidationErrors | 
 
 @Component({
   selector: 'app-books-page',
-  imports: [ReactiveFormsModule, PrimaryButtonComponent, SearchInputComponent],
+  imports: [ReactiveFormsModule, RouterLink, PrimaryButtonComponent, SearchInputComponent],
   templateUrl: './books-page.component.html',
   styleUrl: './books-page.component.scss'
 })
@@ -79,8 +84,11 @@ export class BooksPageComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authSession = inject(AuthSessionService);
   private readonly booksApi = inject(BooksApiService);
   private readonly bookCopiesApi = inject(BookCopiesApiService);
+  private readonly finesApi = inject(FinesApiService);
+  private readonly reservationsApi = inject(ReservationsApiService);
   private readonly mode = (this.route.snapshot.data['mode'] as BooksPageMode | undefined) ?? 'catalog';
 
   protected readonly isManageMode = this.mode === 'manage';
@@ -95,6 +103,10 @@ export class BooksPageComponent {
   protected readonly errorMessage = signal('');
   protected readonly successMessage = signal('');
   protected readonly deletingBookId = signal<string | null>(null);
+  protected readonly reservationContextLoading = signal(false);
+  protected readonly activeReservations = signal<Reservation[]>([]);
+  protected readonly pendingFinesCount = signal(0);
+  protected readonly reservingBookId = signal<string | null>(null);
 
   // — Detalle de libro —
   protected readonly detailOpen = signal(false);
@@ -171,6 +183,7 @@ export class BooksPageComponent {
 
   constructor() {
     this.loadBooks();
+    this.loadReservationContext();
   }
 
   // ——— Libros: filtros y lista ———
@@ -193,6 +206,72 @@ export class BooksPageComponent {
 
   protected reload(): void {
     this.loadBooks();
+    this.loadReservationContext();
+  }
+
+  protected showReserveButton(book: BookRecord): boolean {
+    return !this.isManageMode && this.authSession.isAuthenticated() && book.availableCopies === 0;
+  }
+
+  protected reserveButtonLabel(book: BookRecord): string {
+    if (this.reservingBookId() === book.id) {
+      return 'Reservando...';
+    }
+
+    return this.activeReservationFor(book) ? 'Reservado' : 'Reservar';
+  }
+
+  protected reserveButtonTitle(book: BookRecord): string {
+    const activeReservation = this.activeReservationFor(book);
+
+    if (activeReservation) {
+      return `Ya tenes una reserva activa, posicion ${activeReservation.queuePosition}.`;
+    }
+
+    if (this.pendingFinesCount() > 0) {
+      return 'Tenes multas pendientes. Regulariza tu situacion para reservar.';
+    }
+
+    if (this.reservationContextLoading()) {
+      return 'Validando reservas y multas pendientes...';
+    }
+
+    return 'Crear reserva para este libro.';
+  }
+
+  protected isReserveDisabled(book: BookRecord): boolean {
+    return (
+      this.reservationContextLoading() ||
+      this.reservingBookId() !== null ||
+      this.activeReservationFor(book) !== null ||
+      this.pendingFinesCount() > 0
+    );
+  }
+
+  protected createReservation(book: BookRecord): void {
+    if (!this.showReserveButton(book) || this.isReserveDisabled(book)) {
+      return;
+    }
+
+    this.reservingBookId.set(book.id);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.reservationsApi
+      .createReservation({ bookId: book.id })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (reservation) => {
+          this.reservingBookId.set(null);
+          this.upsertActiveReservation(reservation);
+          this.successMessage.set(`Reserva creada. Estas en posicion ${reservation.queuePosition}.`);
+        },
+        error: (error: unknown) => {
+          this.reservingBookId.set(null);
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible crear la reserva.'));
+          this.loadReservationContext();
+        }
+      });
   }
 
   // ——— Detalle de libro ———
@@ -212,7 +291,7 @@ export class BooksPageComponent {
           this.detailLoading.set(false);
         },
         error: (error: unknown) => {
-          this.detailErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible consultar el libro seleccionado.'));
+          this.detailErrorMessage.set(resolveHttpError(error, 'No fue posible consultar el libro seleccionado.'));
           this.detailLoading.set(false);
         }
       });
@@ -282,7 +361,7 @@ export class BooksPageComponent {
         error: (error: unknown) => {
           this.editorForm.enable();
           this.editorLoading.set(false);
-          this.editorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar el libro para edicion.'));
+          this.editorErrorMessage.set(resolveHttpError(error, 'No fue posible cargar el libro para edicion.'));
         }
       });
   }
@@ -329,7 +408,7 @@ export class BooksPageComponent {
           },
           error: (error: unknown) => {
             this.editorSaving.set(false);
-            this.editorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible registrar el libro.'));
+            this.editorErrorMessage.set(resolveHttpError(error, 'No fue posible registrar el libro.'));
           }
         });
 
@@ -359,7 +438,7 @@ export class BooksPageComponent {
         },
         error: (error: unknown) => {
           this.editorSaving.set(false);
-          this.editorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible actualizar el libro.'));
+          this.editorErrorMessage.set(resolveHttpError(error, 'No fue posible actualizar el libro.'));
         }
       });
   }
@@ -394,7 +473,7 @@ export class BooksPageComponent {
         },
         error: (error: unknown) => {
           this.deletingBookId.set(null);
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible dar de baja el libro seleccionado.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible dar de baja el libro seleccionado.'));
         }
       });
   }
@@ -501,7 +580,7 @@ export class BooksPageComponent {
           },
           error: (error: unknown) => {
             this.copyEditorSaving.set(false);
-            this.copyEditorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible agregar el ejemplar.'));
+            this.copyEditorErrorMessage.set(resolveHttpError(error, 'No fue posible agregar el ejemplar.'));
           }
         });
       return;
@@ -530,7 +609,7 @@ export class BooksPageComponent {
         },
         error: (error: unknown) => {
           this.copyEditorSaving.set(false);
-          this.copyEditorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible actualizar el ejemplar.'));
+          this.copyEditorErrorMessage.set(resolveHttpError(error, 'No fue posible actualizar el ejemplar.'));
         }
       });
   }
@@ -551,7 +630,7 @@ export class BooksPageComponent {
           this.refreshBookCounts(bookId);
         },
         error: (error: unknown) => {
-          this.copiesErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible dar de baja el ejemplar.'));
+          this.copiesErrorMessage.set(resolveHttpError(error, 'No fue posible dar de baja el ejemplar.'));
         }
       });
   }
@@ -716,8 +795,43 @@ export class BooksPageComponent {
           this.loading.set(false);
         },
         error: (error: unknown) => {
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar los libros desde la API.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible cargar los libros desde la API.'));
           this.loading.set(false);
+        }
+      });
+  }
+
+  private loadReservationContext(): void {
+    if (this.isManageMode) {
+      return;
+    }
+
+    const currentUserId = this.authSession.currentUserId();
+
+    if (!currentUserId) {
+      this.activeReservations.set([]);
+      this.pendingFinesCount.set(0);
+      return;
+    }
+
+    this.reservationContextLoading.set(true);
+
+    forkJoin({
+      reservations: this.reservationsApi.listUserReservations(currentUserId),
+      pendingFines: this.finesApi.listUserFines(currentUserId, 'PENDING')
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ reservations, pendingFines }) => {
+          this.activeReservations.set(reservations.filter((reservation) => this.isActiveReservation(reservation)));
+          this.pendingFinesCount.set(pendingFines.length);
+          this.reservationContextLoading.set(false);
+        },
+        error: (error: unknown) => {
+          this.activeReservations.set([]);
+          this.pendingFinesCount.set(0);
+          this.reservationContextLoading.set(false);
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible validar reservas o multas pendientes.'));
         }
       });
   }
@@ -738,7 +852,7 @@ export class BooksPageComponent {
           this.copiesLoading.set(false);
         },
         error: (error: unknown) => {
-          this.copiesErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar los ejemplares.'));
+          this.copiesErrorMessage.set(resolveHttpError(error, 'No fue posible cargar los ejemplares.'));
           this.copiesLoading.set(false);
         }
       });
@@ -851,6 +965,25 @@ export class BooksPageComponent {
     );
   }
 
+  private upsertActiveReservation(reservation: Reservation): void {
+    if (!this.isActiveReservation(reservation)) {
+      return;
+    }
+
+    this.activeReservations.update((reservations) => [
+      ...reservations.filter((currentReservation) => currentReservation.id !== reservation.id),
+      reservation
+    ]);
+  }
+
+  private activeReservationFor(book: BookRecord): Reservation | null {
+    return this.activeReservations().find((reservation) => reservation.bookId === book.id) ?? null;
+  }
+
+  private isActiveReservation(reservation: Reservation): boolean {
+    return reservation.status === 'PENDING' || reservation.status === 'READY';
+  }
+
   private sortBooks(books: ReadonlyArray<BookRecord>): BookRecord[] {
     return [...books].sort((left, right) =>
       left.title.localeCompare(right.title, 'es', { sensitivity: 'base' })
@@ -872,13 +1005,5 @@ export class BooksPageComponent {
     }
   }
 
-  private resolveErrorMessage(error: unknown, fallbackMessage: string): string {
-    if (error instanceof HttpErrorResponse) {
-      const detail = error.error?.detail as string | undefined;
-      const title = error.error?.title as string | undefined;
-      return detail || title || fallbackMessage;
-    }
-
-    return fallbackMessage;
-  }
 }
+

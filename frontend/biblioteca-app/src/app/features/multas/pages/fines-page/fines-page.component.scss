@@ -1,0 +1,120 @@
+.fines-page {
+  display: grid;
+  gap: 1.25rem;
+  animation: page-enter 280ms ease;
+}
+
+.fines-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.fines-page__header h2 {
+  margin: 0;
+  color: var(--slate-950);
+  font-size: clamp(2rem, 1.5rem + 1vw, 2.6rem);
+  letter-spacing: -0.05em;
+}
+
+.fines-page__header p {
+  margin: 0.35rem 0 0;
+  color: var(--slate-400);
+}
+
+.fines-page__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.fines-page__search {
+  flex: 1;
+  max-width: 24rem;
+}
+
+.fines-page__feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 1.4rem;
+  border: 1px solid var(--line-soft);
+}
+
+.fines-page__feedback--error {
+  color: #a23a3f;
+  background: rgba(214, 63, 69, 0.08);
+}
+
+.fines-page__feedback button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fines-page__state {
+  padding: 3rem;
+  text-align: center;
+  color: var(--slate-400);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+}
+
+.fines-page__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+}
+
+.fines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.fines-table th,
+.fines-table td {
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.fines-table th {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface-subtle);
+  white-space: nowrap;
+}
+
+.fines-table td small {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--slate-400);
+}
+
+.fines-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.fines-table__row {
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.fines-table__row:hover td {
+  background: var(--surface-elevated);
+}
+
+.fines-table__chevron {
+  width: 1rem;
+  color: var(--slate-300);
+}

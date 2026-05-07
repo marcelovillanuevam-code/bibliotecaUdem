@@ -1,0 +1,76 @@
+<section class="book-queue-page">
+  <header class="book-queue-page__hero">
+    <div>
+      <p class="book-queue-page__eyebrow">Reservas del libro</p>
+      <h2>Cola de reservas</h2>
+      <p>
+        @if (book(); as selectedBook) {
+          {{ selectedBook.title }}
+        } @else {
+          Libro {{ shortId(bookId) }}
+        }
+      </p>
+    </div>
+
+    <div class="book-queue-page__actions">
+      <app-primary-button variant="secondary" routerLink="/dashboard/libros">
+        <span>Volver a libros</span>
+      </app-primary-button>
+
+      <app-primary-button (click)="reload()">
+        <span>Actualizar</span>
+      </app-primary-button>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="book-queue-page__feedback" role="alert">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  <section class="queue-table" aria-labelledby="queue-title">
+    <div class="queue-table__scroll">
+      <table>
+        <thead>
+          <tr>
+            <th id="queue-title">Posicion</th>
+            <th>Usuario</th>
+            <th>Estado</th>
+            <th>Creada</th>
+            <th>Lista</th>
+            <th>Vence</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr>
+              <td class="queue-table__empty" colspan="6">Cargando cola de reservas...</td>
+            </tr>
+          } @else {
+            @for (reservation of queue(); track trackByReservationId($index, reservation)) {
+              <tr>
+                <td><span class="queue-table__pill">#{{ reservation.queuePosition }}</span></td>
+                <td>
+                  <strong>{{ reservation.userFullName }}</strong>
+                  <small>{{ shortId(reservation.userId) }}</small>
+                </td>
+                <td>
+                  <app-status-badge [label]="statusLabel(reservation.status)" [tone]="statusTone(reservation.status)" [dot]="true" />
+                </td>
+                <td>{{ formatDateTime(reservation.createdAt) }}</td>
+                <td>{{ formatDateTime(reservation.readyAt) }}</td>
+                <td>{{ formatDateTime(reservation.expiresAt) }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="queue-table__empty" colspan="6">Este libro no tiene reservas activas.</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

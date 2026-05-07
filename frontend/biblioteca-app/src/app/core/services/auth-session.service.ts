@@ -4,6 +4,7 @@ import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, LoginRequest } from '../../shared/models/auth.model';
 import { CurrentUser } from '../../shared/models/dashboard.model';
+import { UserRoleCode } from '../../shared/models/user.model';
 
 interface StoredSession {
   tokenType: string;
@@ -20,6 +21,11 @@ export class AuthSessionService {
 
   readonly isAuthenticated = computed(() => this.session() !== null);
   readonly accessToken = computed(() => this.session()?.accessToken ?? '');
+  readonly currentUserId = computed(() => this.session()?.user.id ?? null);
+  readonly currentUserRoleCode = computed(() => this.session()?.user.roles[0] ?? '');
+  readonly currentUserRoleCodes = computed<UserRoleCode[]>(() =>
+    this.session()?.user.roles.filter((role): role is UserRoleCode => this.isKnownRole(role)) ?? []
+  );
   readonly currentUser = computed<CurrentUser>(() => {
     const session = this.session();
 
@@ -60,6 +66,11 @@ export class AuthSessionService {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(AuthSessionService.storageKey);
     }
+  }
+
+  hasAnyRole(roles: readonly UserRoleCode[]): boolean {
+    const roleSet = new Set(this.currentUserRoleCodes());
+    return roles.some((role) => roleSet.has(role));
   }
 
   private persistSession(response: AuthResponse): void {
@@ -109,6 +120,10 @@ export class AuthSessionService {
       default:
         return roleCode || 'Usuario';
     }
+  }
+
+  private isKnownRole(role: string): role is UserRoleCode {
+    return role === 'ADMIN' || role === 'LIBRARIAN' || role === 'TEACHER' || role === 'STUDENT';
   }
 
   private initialsFrom(displayName: string): string {
