@@ -47,5 +47,15 @@ public sealed class NotificationService(
     }
 
     private static NotificationDto MapToDto(Notification n) =>
-        new(n.Id, n.UserId, n.Type.ToString(), n.Channel.ToString(), n.Subject, n.Body, n.Status.ToString(), n.CreatedAt, n.SentAt);
+        new(
+            n.Id,
+            n.UserId,
+            n.Type.ToString(),
+            n.Channel.ToString(),
+            n.Subject,
+            n.Body,
+            n.Status.ToString(),
+            n.CreatedAt,
+            n.SentAt,
+            n.PayloadJson);
 }

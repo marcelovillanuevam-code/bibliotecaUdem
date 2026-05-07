@@ -2,7 +2,18 @@ import { AccentTone } from './user.model';
 
 export type DashboardIcon = 'books' | 'users' | 'available' | 'loans' | 'search';
 export type ActivityIcon = 'book' | 'user' | 'return' | 'alert';
-export type NavIcon = 'dashboard' | 'users' | 'search' | 'library' | 'loans' | 'profile' | 'returns' | 'fines' | 'config' | 'reports';
+export type NavIcon =
+  | 'dashboard'
+  | 'users'
+  | 'search'
+  | 'library'
+  | 'loans'
+  | 'reservations'
+  | 'profile'
+  | 'returns'
+  | 'fines'
+  | 'config'
+  | 'reports';
 
 export interface DashboardStat {
   label: string;

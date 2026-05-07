@@ -58,13 +58,15 @@ export class AppShellComponent {
     const url = this.router.url;
 
     if (url.startsWith('/usuarios')) return 'Usuarios';
-    if (url.startsWith('/dashboard/configuracion/multas')) return 'Configuración de Multas';
-    if (url.startsWith('/dashboard/devoluciones/nueva')) return 'Nueva Devolución';
+    if (url.startsWith('/dashboard/configuracion/multas')) return 'Configuracion de Multas';
+    if (url.startsWith('/dashboard/devoluciones/nueva')) return 'Nueva Devolucion';
     if (url.startsWith('/dashboard/devoluciones')) return 'Devoluciones';
     if (url.startsWith('/dashboard/multas/')) return 'Detalle Multa';
     if (url === '/dashboard/multas') return 'Multas';
     if (url.startsWith('/dashboard/catalogo')) return 'Buscar Libros';
-    if (url.startsWith('/dashboard/libros')) return 'Gestión Libros';
+    if (url.startsWith('/dashboard/libros') && url.includes('/reservas')) return 'Cola de Reservas';
+    if (url.startsWith('/dashboard/libros')) return 'Gestion Libros';
+    if (url.startsWith('/dashboard/reservas')) return 'Mis Reservas';
     if (url.startsWith('/dashboard/prestamos')) return 'Prestamos';
     if (url.startsWith('/dashboard/reportes')) return 'Reportes';
     if (url.startsWith('/dashboard/perfil')) return 'Mi Perfil';

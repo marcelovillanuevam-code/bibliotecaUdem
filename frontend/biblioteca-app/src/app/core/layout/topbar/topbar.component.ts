@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { NotificationBellComponent } from '../../../features/notificaciones/components/notification-bell/notification-bell.component';
 import { CurrentUser } from '../../../shared/models/dashboard.model';
 
 @Component({
   selector: 'app-topbar',
+  imports: [NotificationBellComponent],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss'
 })

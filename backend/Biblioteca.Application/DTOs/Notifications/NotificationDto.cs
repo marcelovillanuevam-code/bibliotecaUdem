@@ -9,4 +9,5 @@ public sealed record NotificationDto(
     string Body,
     string Status,
     DateTime CreatedAt,
-    DateTime? SentAt);
+    DateTime? SentAt,
+    string PayloadJson);

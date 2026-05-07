@@ -109,6 +109,11 @@ public sealed class ReservationService(
     private static ReservationDto MapToDto(Reservation r) => new(
         r.Id,
         r.UserId,
+        UserFullName: r.User?.Profile is { } profile
+            ? string.IsNullOrWhiteSpace(profile.DisplayName)
+                ? $"{profile.FirstName} {profile.LastName}".Trim()
+                : profile.DisplayName
+            : "N/A",
         r.BookId,
         BookTitle: r.Book?.Title ?? "N/A",
         r.QueuePosition,
