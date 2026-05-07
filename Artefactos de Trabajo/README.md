@@ -28,7 +28,3 @@ Los artefactos aquí presentados documentan el proceso de desarrollo del **Siste
 ## Metodología
 
 El proyecto fue desarrollado bajo un enfoque ágil basado en **SCRUM**, organizando el trabajo en sprints y documentando los avances mediante backlogs, minutas, propuestas de mejora y artefactos técnicos.
-
-## Acceso
-
-Este repositorio cuenta con permisos de visualización habilitados para su revisión académica.
