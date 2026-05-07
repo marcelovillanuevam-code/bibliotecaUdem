@@ -21,7 +21,8 @@ export class AuthSessionService {
 
   readonly isAuthenticated = computed(() => this.session() !== null);
   readonly accessToken = computed(() => this.session()?.accessToken ?? '');
-  readonly currentUserId = computed(() => this.session()?.user.id ?? '');
+  readonly currentUserId = computed(() => this.session()?.user.id ?? null);
+  readonly currentUserRoleCode = computed(() => this.session()?.user.roles[0] ?? '');
   readonly currentUserRoleCodes = computed<UserRoleCode[]>(() =>
     this.session()?.user.roles.filter((role): role is UserRoleCode => this.isKnownRole(role)) ?? []
   );

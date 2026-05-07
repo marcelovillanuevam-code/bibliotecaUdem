@@ -83,6 +83,9 @@ export class MockLibraryDataService {
     { label: 'Buscar Libros', route: '/dashboard/catalogo', icon: 'search' },
     { label: 'Gestion Libros', route: '/dashboard/libros', icon: 'library' },
     { label: 'Prestamos', route: '/dashboard/prestamos', icon: 'loans' },
+    { label: 'Devoluciones', route: '/dashboard/devoluciones', icon: 'returns' },
+    { label: 'Multas', route: '/dashboard/multas', icon: 'fines' },
+    { label: 'Config. Multas', route: '/dashboard/configuracion/multas', icon: 'config' },
     { label: 'Mi Perfil', route: '/dashboard/perfil', icon: 'profile' }
   ];
 

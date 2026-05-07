@@ -1,0 +1,118 @@
+<section class="fine-config-page">
+  <header class="fine-config-page__header">
+    <div>
+      <h2>Configuración de Multas</h2>
+      <p>Define las tarifas que aplican a multas por retraso, daño y pérdida.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="fine-config-page__state">Cargando configuración...</div>
+  }
+
+  @let config = activeConfig();
+  @if (config && !loading()) {
+    <div class="config-current">
+      <h3>Tarifa vigente</h3>
+      <dl class="config-current__grid">
+        <div>
+          <dt>Por retraso</dt>
+          <dd>{{ formatAmount(config.lateRatePerDayMxn) }} / día</dd>
+        </div>
+        <div>
+          <dt>Por daño</dt>
+          <dd>{{ formatAmount(config.damageFlatMxn) }}</dd>
+        </div>
+        <div>
+          <dt>Por pérdida</dt>
+          <dd>{{ formatAmount(config.lossFlatMxn) }}</dd>
+        </div>
+        <div>
+          <dt>Vigente desde</dt>
+          <dd>{{ formatDate(config.effectiveFrom) }}</dd>
+        </div>
+      </dl>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="fine-config-page__feedback fine-config-page__feedback--success" role="status">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="fine-config-page__feedback fine-config-page__feedback--error" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <div class="config-form-wrap">
+    <h3>Nueva configuración</h3>
+    <p>Al guardar se crea un nuevo registro con la fecha de vigencia indicada. Las multas generadas con la tarifa anterior no se modifican.</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="config-form">
+      <div class="config-form__grid">
+        <label class="config-form__field">
+          <span>Tarifa por retraso (MXN / día)</span>
+          <input
+            type="number"
+            step="0.5"
+            min="0"
+            formControlName="lateRatePerDayMxn"
+            class="config-form__input"
+          />
+          @if (showFieldError('lateRatePerDayMxn')) {
+            <span class="config-form__error">Ingresa un valor entre 0 y 9,999.</span>
+          }
+        </label>
+
+        <label class="config-form__field">
+          <span>Cargo por daño (MXN, fijo)</span>
+          <input
+            type="number"
+            step="10"
+            min="0"
+            formControlName="damageFlatMxn"
+            class="config-form__input"
+          />
+          @if (showFieldError('damageFlatMxn')) {
+            <span class="config-form__error">Ingresa un valor entre 0 y 99,999.</span>
+          }
+        </label>
+
+        <label class="config-form__field">
+          <span>Cargo por pérdida (MXN, fijo)</span>
+          <input
+            type="number"
+            step="10"
+            min="0"
+            formControlName="lossFlatMxn"
+            class="config-form__input"
+          />
+          @if (showFieldError('lossFlatMxn')) {
+            <span class="config-form__error">Ingresa un valor entre 0 y 99,999.</span>
+          }
+        </label>
+
+        <label class="config-form__field">
+          <span>Vigente desde</span>
+          <input
+            type="date"
+            formControlName="effectiveFrom"
+            class="config-form__input"
+          />
+          @if (showFieldError('effectiveFrom')) {
+            <span class="config-form__error">La fecha de vigencia es obligatoria.</span>
+          }
+        </label>
+      </div>
+
+      <div class="config-form__actions">
+        <app-primary-button type="submit" [disabled]="saving()">
+          {{ saving() ? 'Guardando...' : 'Guardar configuración' }}
+        </app-primary-button>
+      </div>
+    </form>
+  </div>
+</section>

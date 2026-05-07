@@ -9,5 +9,6 @@ import { CurrentUser } from '../../../shared/models/dashboard.model';
 export class TopbarComponent {
   readonly title = input.required<string>();
   readonly user = input.required<CurrentUser>();
+  readonly pendingFinesCount = input(0);
   readonly menuToggle = output<void>();
 }

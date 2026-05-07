@@ -15,6 +15,7 @@
     <app-topbar
       [title]="pageTitle"
       [user]="currentUser()"
+      [pendingFinesCount]="pendingFinesCount()"
       (menuToggle)="toggleSidebar()"
     />
 

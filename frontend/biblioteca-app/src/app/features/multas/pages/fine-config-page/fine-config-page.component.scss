@@ -1,0 +1,152 @@
+.fine-config-page {
+  display: grid;
+  gap: 1.5rem;
+  animation: page-enter 280ms ease;
+}
+
+.fine-config-page__header h2 {
+  margin: 0;
+  color: var(--slate-950);
+  font-size: clamp(2rem, 1.5rem + 1vw, 2.6rem);
+  letter-spacing: -0.05em;
+}
+
+.fine-config-page__header p {
+  margin: 0.35rem 0 0;
+  color: var(--slate-400);
+}
+
+.fine-config-page__state {
+  padding: 3rem;
+  text-align: center;
+  color: var(--slate-400);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+}
+
+.fine-config-page__feedback {
+  padding: 1rem 1.2rem;
+  border-radius: 1.4rem;
+  border: 1px solid var(--line-soft);
+}
+
+.fine-config-page__feedback--error {
+  color: #a23a3f;
+  background: rgba(214, 63, 69, 0.08);
+}
+
+.fine-config-page__feedback--success {
+  color: #1f6a4f;
+  background: rgba(46, 143, 101, 0.1);
+}
+
+.config-current {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  background: white;
+}
+
+.config-current h3 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.config-current__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.config-current__grid > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.config-current__grid dt {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.config-current__grid dd {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.config-form-wrap {
+  padding: 1.5rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  background: white;
+  display: grid;
+  gap: 1rem;
+}
+
+.config-form-wrap h3 {
+  margin: 0;
+  color: var(--slate-900);
+  font-size: 1.1rem;
+}
+
+.config-form-wrap > p {
+  margin: 0;
+  color: var(--slate-400);
+  font-size: 0.9rem;
+}
+
+.config-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.config-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.config-form__field {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--slate-600);
+}
+
+.config-form__input {
+  padding: 0.7rem 0.95rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.85rem;
+  font: inherit;
+  font-size: 0.95rem;
+  background: var(--surface-subtle);
+  color: var(--slate-800);
+  outline: none;
+  transition: border-color 160ms;
+}
+
+.config-form__input:focus {
+  border-color: var(--brand-500);
+  box-shadow: var(--focus-ring);
+}
+
+.config-form__error {
+  font-size: 0.84rem;
+  color: #a23a3f;
+  font-weight: 400;
+}
+
+.config-form__actions {
+  display: flex;
+  justify-content: flex-end;
+}
