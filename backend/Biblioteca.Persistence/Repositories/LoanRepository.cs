@@ -7,10 +7,18 @@ namespace Biblioteca.Persistence.Repositories;
 
 public sealed class LoanRepository(BibliotecaDbContext dbContext) : ILoanRepository
 {
+    private static IQueryable<Loan> WithFullIncludes(IQueryable<Loan> query) =>
+        query
+            .Include(l => l.User).ThenInclude(u => u!.Profile)
+            .Include(l => l.BookCopy).ThenInclude(bc => bc!.Book)
+            .Include(l => l.Renewals);
+
     public Task<Loan?> GetByIdAsync(Guid id, CancellationToken ct) =>
-        dbContext.Loans
-            .AsNoTracking()
-            .Include(l => l.Renewals)
+        WithFullIncludes(dbContext.Loans.AsNoTracking())
+            .FirstOrDefaultAsync(l => l.Id == id, ct);
+
+    public Task<Loan?> GetByIdForUpdateAsync(Guid id, CancellationToken ct) =>
+        WithFullIncludes(dbContext.Loans)
             .FirstOrDefaultAsync(l => l.Id == id, ct);
 
     public Task<Loan?> GetActiveByBookCopyAsync(Guid bookCopyId, CancellationToken ct) =>
@@ -19,24 +27,29 @@ public sealed class LoanRepository(BibliotecaDbContext dbContext) : ILoanReposit
             .FirstOrDefaultAsync(l => l.BookCopyId == bookCopyId && l.Status == LoanStatus.ACTIVE, ct);
 
     public async Task<IReadOnlyCollection<Loan>> GetActiveByUserAsync(Guid userId, CancellationToken ct) =>
-        await dbContext.Loans
-            .AsNoTracking()
+        await WithFullIncludes(dbContext.Loans.AsNoTracking())
             .Where(l => l.UserId == userId && l.Status == LoanStatus.ACTIVE)
             .ToListAsync(ct);
 
     public async Task<IReadOnlyCollection<Loan>> GetByUserAsync(Guid userId, LoanStatus? statusFilter, CancellationToken ct)
     {
-        var query = dbContext.Loans
-            .AsNoTracking()
+        var query = WithFullIncludes(dbContext.Loans.AsNoTracking())
             .Where(l => l.UserId == userId);
 
         if (statusFilter.HasValue)
             query = query.Where(l => l.Status == statusFilter.Value);
 
-        return await query
-            .Include(l => l.Renewals)
-            .OrderByDescending(l => l.LoanedAt)
-            .ToListAsync(ct);
+        return await query.OrderByDescending(l => l.LoanedAt).ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyCollection<Loan>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct)
+    {
+        var query = WithFullIncludes(dbContext.Loans.AsNoTracking());
+
+        if (statusFilter.HasValue)
+            query = query.Where(l => l.Status == statusFilter.Value);
+
+        return await query.OrderByDescending(l => l.LoanedAt).ToListAsync(ct);
     }
 
     public async Task<Loan> AddAsync(Loan loan, CancellationToken ct)
@@ -55,4 +68,10 @@ public sealed class LoanRepository(BibliotecaDbContext dbContext) : ILoanReposit
     public Task<int> CountActiveByUserAsync(Guid userId, CancellationToken ct) =>
         dbContext.Loans
             .CountAsync(l => l.UserId == userId && l.Status == LoanStatus.ACTIVE, ct);
+
+    public async Task<IReadOnlyCollection<Loan>> GetOverdueActiveAsync(CancellationToken ct) =>
+        await dbContext.Loans
+            .AsNoTracking()
+            .Where(l => l.Status == LoanStatus.ACTIVE && l.DueAt < DateTime.UtcNow)
+            .ToListAsync(ct);
 }

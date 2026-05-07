@@ -61,4 +61,8 @@ public sealed class BookCopyRepository(
         copy.UpdatedAt = now;
         dbContext.BookCopies.Update(copy);
     }
+
+    public Task<int> CountAvailableByBookIdAsync(Guid bookId, CancellationToken cancellationToken) =>
+        dbContext.BookCopies
+            .CountAsync(bc => bc.BookId == bookId && bc.Status == BookCopyStatus.Available, cancellationToken);
 }

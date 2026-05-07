@@ -51,6 +51,9 @@ public static class ServiceCollectionExtensions
             options.AddPolicy(AuthPolicies.AdminOrLibrarian,
                 policy => policy.RequireRole("ADMIN", "LIBRARIAN"));
 
+            options.AddPolicy(AuthPolicies.TreasuryOrAdmin,
+                policy => policy.RequireRole("ADMIN", "TREASURY"));
+
             options.AddPolicy(AuthPolicies.Authenticated,
                 policy => policy.RequireAuthenticatedUser());
         });

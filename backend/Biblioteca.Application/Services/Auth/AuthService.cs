@@ -31,8 +31,6 @@ public sealed class AuthService(
             throw new ValidationException($"Solo se permiten correos institucionales @{allowedDomain}.");
         }
 
-        await usuarioRepository.EnsureReferenceDataAsync(cancellationToken);
-
         if (await usuarioRepository.UsernameExistsAsync(normalizedUsername, cancellationToken))
         {
             throw new ConflictException("El nombre de usuario ya esta registrado.");

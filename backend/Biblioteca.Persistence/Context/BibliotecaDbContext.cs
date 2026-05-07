@@ -3,16 +3,22 @@ using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Biblioteca.Persistence.Context;
 
 public sealed class BibliotecaDbContext(
     DbContextOptions<BibliotecaDbContext> options,
-    ICurrentUserService currentUserService) : DbContext(options)
+    ICurrentUserService currentUserService) : DbContext(options), IUnitOfWork
 {
     public DbSet<RegistroAuditoria> AuditLogs => Set<RegistroAuditoria>();
     public DbSet<Loan> Loans => Set<Loan>();
     public DbSet<LoanRenewal> LoanRenewals => Set<LoanRenewal>();
+    public DbSet<Return> Returns => Set<Return>();
+    public DbSet<Fine> Fines => Set<Fine>();
+    public DbSet<FineConfig> FineConfigs => Set<FineConfig>();
+    public DbSet<Reservation> Reservations => Set<Reservation>();
+    public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<Autor> Authors => Set<Autor>();
     public DbSet<LibroAutor> BookAuthors => Set<LibroAutor>();
     public DbSet<LibroMateria> BookSubjects => Set<LibroMateria>();
@@ -35,6 +41,29 @@ public sealed class BibliotecaDbContext(
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BibliotecaDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }
+
+    private IDbContextTransaction? _currentTransaction;
+
+    public async Task BeginTransactionAsync(CancellationToken ct)
+        => _currentTransaction = await Database.BeginTransactionAsync(ct);
+
+    public async Task CommitAsync(CancellationToken ct)
+    {
+        if (_currentTransaction is null) return;
+        await _currentTransaction.CommitAsync(ct);
+        await _currentTransaction.DisposeAsync();
+        _currentTransaction = null;
+    }
+
+    public async Task RollbackAsync(CancellationToken ct)
+    {
+        if (_currentTransaction is null) return;
+        await _currentTransaction.RollbackAsync(ct);
+        await _currentTransaction.DisposeAsync();
+        _currentTransaction = null;
+    }
+
+    Task<int> IUnitOfWork.SaveChangesAsync(CancellationToken ct) => SaveChangesAsync(ct);
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -121,6 +150,9 @@ public sealed class BibliotecaDbContext(
             BookCopy bc => ("book_copies", bc.Id),
             Loan loan => ("loans", loan.Id),
             LoanRenewal lr => ("loan_renewals", lr.Id),
+            Return ret => ("returns", ret.Id),
+            Fine fine => ("fines", fine.Id),
+            Reservation res => ("reservations", res.Id),
             _ => (null, null)
         };
 }
