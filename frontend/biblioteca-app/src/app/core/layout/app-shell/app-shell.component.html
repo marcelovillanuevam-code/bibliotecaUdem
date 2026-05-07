@@ -1,0 +1,27 @@
+<div class="shell">
+  <app-sidebar
+    [items]="libraryData.navItems"
+    [currentUser]="currentUser()"
+    [open]="sidebarOpen()"
+    (closeRequest)="closeSidebar()"
+    (logoutRequest)="logout()"
+  />
+
+  @if (sidebarOpen()) {
+    <button class="shell__overlay" type="button" (click)="closeSidebar()" aria-label="Cerrar menu lateral"></button>
+  }
+
+  <div class="shell__main">
+    <app-topbar
+      [title]="pageTitle"
+      [user]="currentUser()"
+      (menuToggle)="toggleSidebar()"
+    />
+
+    <main class="shell__content">
+      <router-outlet />
+    </main>
+  </div>
+
+  <app-support-fab />
+</div>

@@ -1,0 +1,73 @@
+.avatar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.95rem;
+  min-width: 0;
+}
+
+.avatar-chip--compact {
+  gap: 0.75rem;
+}
+
+.avatar-chip__mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.95rem;
+  height: 2.95rem;
+  border-radius: 50%;
+  color: white;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: var(--brand-600);
+}
+
+.avatar-chip--compact .avatar-chip__mark {
+  width: 2.45rem;
+  height: 2.45rem;
+}
+
+.avatar-chip__mark--blue {
+  background: linear-gradient(180deg, #365ac0, #25408b);
+}
+
+.avatar-chip__mark--violet {
+  background: linear-gradient(180deg, #8b5cf6, #7043d2);
+}
+
+.avatar-chip__mark--green {
+  background: linear-gradient(180deg, #16a085, #0d8f74);
+}
+
+.avatar-chip__mark--amber {
+  background: linear-gradient(180deg, #f0b04a, #df8c1a);
+}
+
+.avatar-chip__mark--slate {
+  background: linear-gradient(180deg, #5a708e, #405268);
+}
+
+.avatar-chip__copy {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.avatar-chip__copy strong,
+.avatar-chip__copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar-chip__copy strong {
+  color: var(--slate-950);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.avatar-chip__copy small {
+  color: var(--slate-400);
+  font-size: 0.94rem;
+}

@@ -1,0 +1,250 @@
+<section class="users-page">
+  <header class="users-page__header">
+    <div>
+      <h2>Usuarios</h2>
+      <p>{{ users().length }} usuarios registrados</p>
+    </div>
+
+    <app-primary-button (click)="openCreateEditor()">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+      <span>Agregar usuario</span>
+    </app-primary-button>
+  </header>
+
+  <section class="users-page__toolbar" aria-label="Controles de busqueda y filtro">
+    <app-search-input
+      class="users-page__search"
+      placeholder="Buscar por nombre, email o ID..."
+      [value]="searchTerm()"
+      (valueChange)="updateSearch($event)"
+    />
+
+    <app-filter-select
+      ariaLabel="Filtrar por rol"
+      [options]="roleFilterOptions"
+      [value]="selectedRole()"
+      (valueChange)="updateRole($event)"
+    />
+  </section>
+
+  @if (successMessage()) {
+    <div class="users-page__feedback users-page__feedback--success" role="status">
+      <span>{{ successMessage() }}</span>
+      <button type="button" (click)="dismissSuccessMessage()">Cerrar</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="users-page__feedback users-page__feedback--error" role="alert">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  @if (editorMode()) {
+    <section class="user-editor-backdrop" (click)="closeEditor()">
+      <div class="user-editor" (click)="$event.stopPropagation()" aria-labelledby="user-editor-title">
+        <div class="user-editor__head">
+          <div>
+            <p class="user-editor__eyebrow">Gestion administrativa</p>
+            <h3 id="user-editor-title">{{ editorTitle() }}</h3>
+            <p>{{ editorDescription() }}</p>
+          </div>
+
+          <button
+            class="user-editor__close"
+            type="button"
+            aria-label="Cerrar formulario"
+            (click)="closeEditor()"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        @if (editorErrorMessage()) {
+          <div class="user-editor__feedback user-editor__feedback--error" role="alert">
+            {{ editorErrorMessage() }}
+          </div>
+        }
+
+        @if (editorLoading()) {
+          <div class="user-editor__loading">Cargando informacion del usuario...</div>
+        } @else {
+          <form class="user-editor__form" [formGroup]="form" (ngSubmit)="submitEditor()">
+            <div class="user-editor__grid">
+              <label class="user-editor__field">
+                <span>Usuario</span>
+                <input type="text" formControlName="username" placeholder="prof.math" />
+                @if (showFieldError('username')) {
+                  <small>{{ fieldErrorMessage('username') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>Correo</span>
+                <input type="email" formControlName="email" placeholder="usuario@udem.edu" />
+                @if (showFieldError('email')) {
+                  <small>{{ fieldErrorMessage('email') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>Nombre</span>
+                <input type="text" formControlName="firstName" placeholder="Elena" />
+                @if (showFieldError('firstName')) {
+                  <small>{{ fieldErrorMessage('firstName') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>Apellido</span>
+                <input type="text" formControlName="lastName" placeholder="Suarez" />
+                @if (showFieldError('lastName')) {
+                  <small>{{ fieldErrorMessage('lastName') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>Nombre para mostrar</span>
+                <input type="text" formControlName="displayName" placeholder="Dra. Elena Suarez" />
+                @if (showFieldError('displayName')) {
+                  <small>{{ fieldErrorMessage('displayName') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>{{ editorMode() === 'create' ? 'Contrasena' : 'Contrasena nueva opcional' }}</span>
+                <input
+                  type="password"
+                  formControlName="password"
+                  [placeholder]="editorMode() === 'create' ? 'Password123!' : 'Solo si deseas actualizarla'"
+                />
+                @if (showFieldError('password')) {
+                  <small>{{ fieldErrorMessage('password') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>Rol</span>
+                <select formControlName="roleCode">
+                  @for (role of roleOptions; track role.value) {
+                    <option [value]="role.value">{{ role.label }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="user-editor__field">
+                <span>Estado</span>
+                <select formControlName="statusCode">
+                  @for (status of statusOptions; track status.value) {
+                    <option [value]="status.value">{{ status.label }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="user-editor__field">
+                <span>Locale preferido</span>
+                <input type="text" formControlName="preferredLocale" placeholder="es_MX" />
+                @if (showFieldError('preferredLocale')) {
+                  <small>{{ fieldErrorMessage('preferredLocale') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>Tipo de documento</span>
+                <input type="text" formControlName="documentType" placeholder="employee_id" />
+                @if (showFieldError('documentType')) {
+                  <small>{{ fieldErrorMessage('documentType') }}</small>
+                }
+              </label>
+
+              <label class="user-editor__field">
+                <span>Numero de documento</span>
+                <input type="text" formControlName="documentNumber" placeholder="PRF-2026-001" />
+                @if (showFieldError('documentNumber')) {
+                  <small>{{ fieldErrorMessage('documentNumber') }}</small>
+                }
+              </label>
+            </div>
+
+            <div class="user-editor__actions">
+              <app-primary-button variant="secondary" (click)="closeEditor()">
+                <span>Cancelar</span>
+              </app-primary-button>
+
+              <app-primary-button type="submit" [disabled]="editorSaving()">
+                <span>{{ editorActionLabel() }}</span>
+              </app-primary-button>
+            </div>
+          </form>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="users-table" aria-labelledby="usuarios-tabla">
+    <div class="users-table__scroll">
+      <table>
+        <thead>
+          <tr>
+            <th id="usuarios-tabla">Usuario</th>
+            <th>ID universitario</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th class="users-table__actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr>
+              <td class="users-table__empty" colspan="6">Cargando usuarios desde la API...</td>
+            </tr>
+          } @else {
+            @for (user of filteredUsers(); track user.id) {
+              <tr>
+                <td>
+                  <app-avatar-chip
+                    [initials]="user.initials"
+                    [title]="fullName(user)"
+                    [tone]="user.accent"
+                  />
+                </td>
+                <td><span class="users-table__pill">{{ user.universityId }}</span></td>
+                <td>{{ user.email }}</td>
+                <td><app-status-badge [label]="user.role" [tone]="roleTone(user.role)" /></td>
+                <td><app-status-badge [label]="user.status" [tone]="statusTone(user.status)" [dot]="true" /></td>
+                <td class="users-table__actions">
+                  <button type="button" aria-label="Ver detalle del usuario" disabled>
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M2 12C3.8 8.2 7.2 6 12 6C16.8 6 20.2 8.2 22 12C20.2 15.8 16.8 18 12 18C7.2 18 3.8 15.8 2 12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" />
+                    </svg>
+                  </button>
+                  <button type="button" aria-label="Editar usuario" (click)="openEditEditor(user)">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M4 20H8L18.5 9.5C19.3284 8.67157 19.3284 7.32843 18.5 6.5V6.5C17.6716 5.67157 16.3284 5.67157 15.5 6.5L5 17V20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                  <button type="button" aria-label="Eliminar usuario" (click)="removeUser(user)" [disabled]="isDeleting(user.id)">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M5 7H19M9 7V5C9 4.44772 9.44772 4 10 4H14C14.5523 4 15 4.44772 15 5V7M8 7V19C8 19.5523 8.44772 20 9 20H15C15.5523 20 16 19.5523 16 19V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="users-table__empty" colspan="6">No se encontraron usuarios con los filtros actuales.</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

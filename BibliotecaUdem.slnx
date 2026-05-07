@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/Biblioteca.API/Biblioteca.API.csproj" />
+    <Project Path="backend/Biblioteca.Application/Biblioteca.Application.csproj" />
+    <Project Path="backend/Biblioteca.Domain/Biblioteca.Domain.csproj" />
+    <Project Path="backend/Biblioteca.Infrastructure/Biblioteca.Infrastructure.csproj" />
+    <Project Path="backend/Biblioteca.Persistence/Biblioteca.Persistence.csproj" />
+  </Folder>
+</Solution>

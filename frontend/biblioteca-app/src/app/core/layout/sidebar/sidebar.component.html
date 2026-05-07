@@ -1,0 +1,94 @@
+<aside class="sidebar" [class.sidebar--open]="open()">
+  <div class="sidebar__brand">
+    <div class="sidebar__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M3 8L12 3L21 8L12 13L3 8Z"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M7 10.5V14C7 15.6569 9.23858 17 12 17C14.7614 17 17 15.6569 17 14V10.5"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+        />
+      </svg>
+    </div>
+    <div class="sidebar__title">
+      <small>UDEM</small>
+      <strong>Biblioteca</strong>
+    </div>
+  </div>
+
+  <div class="sidebar__section">
+    <p>Menú principal</p>
+    <nav aria-label="Principal">
+      @for (item of items(); track trackByLabel($index, item)) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="sidebar__link--active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' || item.route === '/usuarios' }"
+          class="sidebar__link"
+          (click)="closeRequest.emit()"
+        >
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                [attr.d]="iconPath(item.icon)"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span>{{ item.label }}</span>
+          <span class="sidebar__arrow" aria-hidden="true">›</span>
+        </a>
+      }
+    </nav>
+  </div>
+
+  <div class="sidebar__section sidebar__section--support">
+    <p>Soporte</p>
+    <button class="sidebar__support" type="button">
+      <span class="sidebar__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path
+            d="M8 17L4 20V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V15C20 16.1046 19.1046 17 18 17H8Z"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      <span>Chatbot Ayuda</span>
+      <span class="sidebar__tag">IA</span>
+    </button>
+  </div>
+
+  <div class="sidebar__footer">
+    <div class="sidebar__profile">
+      <span class="sidebar__avatar">{{ currentUser().initials }}</span>
+      <div>
+        <strong>{{ currentUser().name }}</strong>
+        <small>{{ currentUser().role }}</small>
+      </div>
+    </div>
+
+    <button class="sidebar__logout" type="button" (click)="logoutRequest.emit()">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M15 16L19 12M19 12L15 8M19 12H9M11 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H11"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span>Cerrar sesión</span>
+    </button>
+  </div>
+</aside>

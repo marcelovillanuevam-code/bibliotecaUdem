@@ -1,0 +1,11 @@
+<div class="avatar-chip" [class.avatar-chip--compact]="compact()">
+  <span [class]="'avatar-chip__mark avatar-chip__mark--' + tone()">
+    {{ initials() }}
+  </span>
+  <span class="avatar-chip__copy">
+    <strong>{{ title() }}</strong>
+    @if (subtitle()) {
+      <small>{{ subtitle() }}</small>
+    }
+  </span>
+</div>

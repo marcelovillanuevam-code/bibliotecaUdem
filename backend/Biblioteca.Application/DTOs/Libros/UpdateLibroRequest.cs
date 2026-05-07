@@ -1,0 +1,37 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Biblioteca.Application.DTOs.Libros;
+
+public sealed class UpdateLibroRequest
+{
+    [Required]
+    [StringLength(500)]
+    public string Title { get; init; } = string.Empty;
+
+    [StringLength(500)]
+    public string? Subtitle { get; init; }
+
+    [StringLength(50)]
+    public string? Isbn { get; init; }
+
+    [StringLength(255)]
+    public string? Publisher { get; init; }
+
+    [Range(0, 32767)]
+    public short? PublicationYear { get; init; }
+
+    [StringLength(100)]
+    public string? Edition { get; init; }
+
+    [StringLength(50)]
+    public string Language { get; init; } = "es";
+
+    public string? SummaryJson { get; init; }
+    public string? MetadataJson { get; init; }
+
+    [MinLength(1)]
+    public IReadOnlyCollection<CreateLibroAuthorRequest> Authors { get; init; } = [];
+
+    [MinLength(1)]
+    public IReadOnlyCollection<string> SubjectCodes { get; init; } = [];
+}

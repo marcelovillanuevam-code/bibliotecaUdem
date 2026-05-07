@@ -1,0 +1,340 @@
+<section class="books-page">
+  <header class="books-page__hero">
+    <div>
+      <p class="books-page__eyebrow">{{ isManageMode ? 'Sprint 1A · Administracion' : 'Sprint 1A · Catalogo' }}</p>
+      <h2>{{ pageTitle }}</h2>
+      <p>{{ pageDescription }}</p>
+    </div>
+
+    @if (isManageMode) {
+      <app-primary-button (click)="openCreateEditor()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span>Alta libro</span>
+      </app-primary-button>
+    }
+  </header>
+
+  <section class="books-filters">
+    <form class="books-filters__grid" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+      <app-search-input
+        class="books-filters__search"
+        placeholder="Buscar por titulo..."
+        [value]="filterForm.controls.title.value"
+        (valueChange)="filterForm.controls.title.setValue($event)"
+      />
+
+      <label class="books-filters__field">
+        <span>Autor</span>
+        <input type="text" formControlName="author" placeholder="Gabriel Garcia Marquez" />
+      </label>
+
+      <label class="books-filters__field">
+        <span>Materia</span>
+        <input type="text" formControlName="subject" placeholder="LIT_LATAM o Literatura" />
+      </label>
+
+      <label class="books-filters__field">
+        <span>ISBN</span>
+        <input type="text" formControlName="isbn" placeholder="9780307474728" />
+      </label>
+
+      <label class="books-filters__field">
+        <span>Editorial</span>
+        <input type="text" formControlName="publisher" placeholder="Editorial Sudamericana" />
+      </label>
+
+      <label class="books-filters__field">
+        <span>Idioma</span>
+        <input type="text" formControlName="language" placeholder="es" />
+      </label>
+
+      <div class="books-filters__actions">
+        <app-primary-button variant="secondary" (click)="resetFilters()">
+          <span>Limpiar</span>
+        </app-primary-button>
+
+        <app-primary-button type="submit">
+          <span>Aplicar filtros</span>
+        </app-primary-button>
+      </div>
+    </form>
+  </section>
+
+  @if (successMessage()) {
+    <div class="books-page__feedback books-page__feedback--success" role="status">
+      <span>{{ successMessage() }}</span>
+      <button type="button" (click)="dismissSuccessMessage()">Cerrar</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="books-page__feedback books-page__feedback--error" role="alert">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  <section class="books-list" aria-label="Resultados de libros">
+    @if (loading()) {
+      <article class="books-list__empty">Cargando libros desde la API...</article>
+    } @else {
+      @for (book of books(); track book.id) {
+        <article class="book-card">
+          <div class="book-card__head">
+            <div>
+              <h3>{{ book.title }}</h3>
+              @if (book.subtitle) {
+                <p>{{ book.subtitle }}</p>
+              }
+            </div>
+
+            <span class="book-card__language">{{ book.language.toUpperCase() }}</span>
+          </div>
+
+          <p class="book-card__authors">{{ formatAuthors(book) }}</p>
+          <p class="book-card__meta">{{ formatBookMeta(book) }}</p>
+
+          <div class="book-card__subjects">
+            @for (subject of book.subjects; track subject.id) {
+              <span>{{ subject.code }}</span>
+            }
+          </div>
+
+          <div class="book-card__actions">
+            <button type="button" (click)="openDetail(book.id)">Consultar</button>
+
+            @if (isManageMode) {
+              <button type="button" (click)="openEditEditor(book.id)">Editar</button>
+              <button type="button" class="book-card__danger" (click)="removeBook(book)" [disabled]="isDeleting(book.id)">
+                {{ isDeleting(book.id) ? 'Bajando...' : 'Baja' }}
+              </button>
+            }
+          </div>
+        </article>
+      } @empty {
+        <article class="books-list__empty">No se encontraron libros con los filtros actuales.</article>
+      }
+    }
+  </section>
+
+  @if (detailOpen()) {
+    <section class="book-modal-backdrop" (click)="closeDetail()">
+      <div class="book-modal book-modal--detail" (click)="$event.stopPropagation()" aria-labelledby="book-detail-title">
+        <div class="book-modal__head">
+          <div>
+            <p class="book-modal__eyebrow">Consulta de libro</p>
+            <h3 id="book-detail-title">Detalle bibliografico</h3>
+          </div>
+
+          <button class="book-modal__close" type="button" aria-label="Cerrar detalle" (click)="closeDetail()">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        @if (detailLoading()) {
+          <div class="book-modal__loading">Cargando informacion del libro...</div>
+        } @else if (detailErrorMessage()) {
+          <div class="book-modal__feedback book-modal__feedback--error" role="alert">
+            {{ detailErrorMessage() }}
+          </div>
+        } @else if (selectedBook(); as book) {
+          <div class="book-detail">
+            <header class="book-detail__hero">
+              <div>
+                <p class="book-detail__eyebrow">{{ formatSubjects(book) }}</p>
+                <h4>{{ book.title }}</h4>
+                @if (book.subtitle) {
+                  <p>{{ book.subtitle }}</p>
+                }
+              </div>
+              <span>{{ book.language.toUpperCase() }}</span>
+            </header>
+
+            <section class="book-detail__grid">
+              <article>
+                <h5>Autores</h5>
+                <p>{{ formatAuthors(book) }}</p>
+              </article>
+              <article>
+                <h5>ISBN</h5>
+                <p>{{ book.isbn || 'Sin ISBN registrado' }}</p>
+              </article>
+              <article>
+                <h5>Editorial</h5>
+                <p>{{ book.publisher || 'Sin editorial registrada' }}</p>
+              </article>
+              <article>
+                <h5>Edicion y ano</h5>
+                <p>{{ book.edition || 'S/E' }} · {{ book.publicationYear || 'S/A' }}</p>
+              </article>
+              <article>
+                <h5>Ubicacion en biblioteca</h5>
+                <p>{{ locationLabel(book) }}</p>
+              </article>
+              <article>
+                <h5>Actualizado</h5>
+                <p>{{ formatTimestamp(book.updatedAt) }}</p>
+              </article>
+            </section>
+
+            <section class="book-detail__json">
+              <article>
+                <h5>Resumen JSON</h5>
+                <pre>{{ book.summaryJson || 'Sin resumen estructurado.' }}</pre>
+              </article>
+              <article>
+                <h5>Metadata JSON</h5>
+                <pre>{{ book.metadataJson || 'Sin metadata estructurada.' }}</pre>
+              </article>
+            </section>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  @if (editorMode()) {
+    <section class="book-modal-backdrop" (click)="closeEditor()">
+      <div class="book-modal" (click)="$event.stopPropagation()" aria-labelledby="book-editor-title">
+        <div class="book-modal__head">
+          <div>
+            <p class="book-modal__eyebrow">Gestion administrativa</p>
+            <h3 id="book-editor-title">{{ editorMode() === 'create' ? 'Alta de Libro' : 'Cambio de Libro' }}</h3>
+            <p>Captura los datos del libro, autores y materias para guardar el registro en catalogo.</p>
+          </div>
+
+          <button class="book-modal__close" type="button" aria-label="Cerrar formulario" (click)="closeEditor()">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        @if (editorErrorMessage()) {
+          <div class="book-modal__feedback book-modal__feedback--error" role="alert">
+            {{ editorErrorMessage() }}
+          </div>
+        }
+
+        @if (editorLoading()) {
+          <div class="book-modal__loading">Cargando informacion del libro...</div>
+        } @else {
+          <form class="book-editor" [formGroup]="editorForm" (ngSubmit)="submitEditor()">
+            <div class="book-editor__grid">
+              <label class="book-editor__field">
+                <span>Titulo</span>
+                <input type="text" formControlName="title" placeholder="El Aleph" />
+                @if (hasFieldError('title')) {
+                  <small>{{ fieldErrorMessage('title') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field">
+                <span>Subtitulo</span>
+                <input type="text" formControlName="subtitle" placeholder="A Novel" />
+                @if (hasFieldError('subtitle')) {
+                  <small>{{ fieldErrorMessage('subtitle') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field">
+                <span>ISBN</span>
+                <input type="text" formControlName="isbn" placeholder="9780307474728" />
+                @if (hasFieldError('isbn')) {
+                  <small>{{ fieldErrorMessage('isbn') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field">
+                <span>Editorial</span>
+                <input type="text" formControlName="publisher" placeholder="Editorial Sudamericana" />
+                @if (hasFieldError('publisher')) {
+                  <small>{{ fieldErrorMessage('publisher') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field">
+                <span>Ano de publicacion</span>
+                <input type="number" formControlName="publicationYear" placeholder="1967" />
+              </label>
+
+              <label class="book-editor__field">
+                <span>Edicion</span>
+                <input type="text" formControlName="edition" placeholder="1" />
+                @if (hasFieldError('edition')) {
+                  <small>{{ fieldErrorMessage('edition') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field">
+                <span>Idioma</span>
+                <input type="text" formControlName="language" placeholder="es" />
+                @if (hasFieldError('language')) {
+                  <small>{{ fieldErrorMessage('language') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field book-editor__field--wide">
+                <span>Autores</span>
+                <textarea
+                  formControlName="authorsRaw"
+                  rows="4"
+                  placeholder="Jorge Luis Borges | Autor&#10;Adolfo Bioy Casares | Prologo"
+                ></textarea>
+                @if (hasFieldError('authorsRaw')) {
+                  <small>{{ fieldErrorMessage('authorsRaw') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field book-editor__field--wide">
+                <span>Materias</span>
+                <input type="text" formControlName="subjectCodesRaw" placeholder="LIT_LATAM, SCI_FI" />
+                @if (hasFieldError('subjectCodesRaw')) {
+                  <small>{{ fieldErrorMessage('subjectCodesRaw') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field book-editor__field--wide">
+                <span>Resumen JSON</span>
+                <textarea
+                  formControlName="summaryJson"
+                  rows="4"
+                  placeholder='{"short":"Coleccion de cuentos"}'
+                ></textarea>
+                @if (hasFieldError('summaryJson')) {
+                  <small>{{ fieldErrorMessage('summaryJson') }}</small>
+                }
+              </label>
+
+              <label class="book-editor__field book-editor__field--wide">
+                <span>Metadata JSON</span>
+                <textarea
+                  formControlName="metadataJson"
+                  rows="5"
+                  placeholder='{"format":"tapa blanda","location":{"libraryName":"Biblioteca Central","section":"Humanidades","shelf":"A1"}}'
+                ></textarea>
+                @if (hasFieldError('metadataJson')) {
+                  <small>{{ fieldErrorMessage('metadataJson') }}</small>
+                }
+              </label>
+            </div>
+
+            <div class="book-editor__actions">
+              <app-primary-button variant="secondary" (click)="closeEditor()">
+                <span>Cancelar</span>
+              </app-primary-button>
+
+              <app-primary-button type="submit" [disabled]="editorSaving()">
+                <span>{{ editorActionLabel() }}</span>
+              </app-primary-button>
+            </div>
+          </form>
+        }
+      </div>
+    </section>
+  }
+</section>

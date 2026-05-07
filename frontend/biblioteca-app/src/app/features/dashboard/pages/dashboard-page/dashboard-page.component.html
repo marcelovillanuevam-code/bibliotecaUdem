@@ -1,0 +1,91 @@
+<section class="dashboard-page">
+  <header class="dashboard-page__hero">
+    <div class="dashboard-page__identity">
+      <app-avatar-chip
+        [initials]="currentUser().initials"
+        [title]="currentUser().name"
+        [subtitle]="currentUser().role + ' · ' + currentUser().code"
+        tone="blue"
+      />
+      <div class="dashboard-page__welcome">
+        <p>Bienvenido de vuelta,</p>
+        <h2>{{ currentUser().name }}</h2>
+      </div>
+    </div>
+
+    <div class="dashboard-page__clock">
+      <small>{{ libraryData.dashboardDateLabel() }}</small>
+      <strong>{{ libraryData.dashboardTimeLabel() }}</strong>
+    </div>
+  </header>
+
+  <section class="dashboard-page__stats" aria-label="Indicadores principales">
+    @for (stat of libraryData.dashboardStats(); track stat.label) {
+      <article class="stat-card">
+        <span class="stat-card__icon" [class]="'stat-card__icon stat-card__icon--' + stat.tone">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path [attr.d]="statIcon(stat.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <strong>{{ stat.value }}</strong>
+        <h3>{{ stat.label }}</h3>
+        <p>{{ stat.note }}</p>
+      </article>
+    }
+  </section>
+
+  <section class="dashboard-page__lower">
+    <article class="dashboard-panel">
+      <header class="dashboard-panel__header">
+        <div>
+          <h3>Acciones rápidas</h3>
+          <p>Entradas frecuentes para operación del sistema.</p>
+        </div>
+      </header>
+
+      <div class="quick-actions">
+        @for (action of libraryData.quickActions(); track action.title) {
+          <a class="quick-actions__item" [routerLink]="action.route">
+            <span class="quick-actions__icon" [class]="'quick-actions__icon quick-actions__icon--' + action.tone">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path [attr.d]="statIcon(action.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span class="quick-actions__copy">
+              <strong>{{ action.title }}</strong>
+              <small>{{ action.description }}</small>
+            </span>
+            <span class="quick-actions__arrow" aria-hidden="true">→</span>
+          </a>
+        }
+      </div>
+    </article>
+
+    <article class="dashboard-panel dashboard-panel--activity">
+      <header class="dashboard-panel__header">
+        <div>
+          <h3>Actividad reciente</h3>
+          <p>Movimientos operativos del día actual.</p>
+        </div>
+        <span class="dashboard-panel__stamp">Actualizado ahora</span>
+      </header>
+
+      <div class="activity-list">
+        @for (item of libraryData.recentActivity(); track item.id) {
+          <article class="activity-list__item">
+            <span class="activity-list__icon" [class]="'activity-list__icon activity-list__icon--' + item.tone">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path [attr.d]="activityIcon(item.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <div class="activity-list__copy">
+              <strong>{{ item.title }}</strong>
+              <p>{{ item.subtitle }}</p>
+            </div>
+            <small>{{ item.timeLabel }}</small>
+          </article>
+        }
+      </div>
+    </article>
+  </section>
+</section>
