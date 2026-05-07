@@ -13,9 +13,19 @@ if (OperatingSystem.IsWindows())
     builder.Logging.AddFilter<EventLogLoggerProvider>(_ => false);
 }
 
+// Falla el arranque si el secret JWT no está configurado o es demasiado corto.
+// Configurar via user secrets (dev) o variable de entorno Jwt__SecretKey (prod/docker).
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
+if (string.IsNullOrWhiteSpace(jwtSecretKey) || jwtSecretKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "Jwt:SecretKey no configurada o demasiado corta (minimo 32 caracteres). " +
+        "Configurar via user secrets o variable de entorno Jwt__SecretKey.");
+}
+
 builder.Services
     .AddApiConfiguration()
-    .AddApplication()
+    .AddApplication(builder.Configuration)
     .AddInfrastructure(builder.Configuration)
     .AddPersistence(builder.Configuration);
 

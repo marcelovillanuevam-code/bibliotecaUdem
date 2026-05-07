@@ -22,7 +22,10 @@ public sealed class RegisterUserRequest
     public string Email { get; init; } = string.Empty;
 
     [Required]
-    [StringLength(128, MinimumLength = 8)]
+    [StringLength(128)]
+    [RegularExpression(
+        @"^(?=.*[A-Za-z])(?=.*\d).{8,}$",
+        ErrorMessage = "La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.")]
     public string Password { get; init; } = string.Empty;
 
     [StringLength(10)]

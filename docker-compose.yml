@@ -27,14 +27,16 @@ services:
       dockerfile: backend/Biblioteca.API/Dockerfile
     container_name: bibliotecaudem-backend
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=biblioteca_udem;Username=postgres;Password=postgres
       Jwt__Issuer: BibliotecaUdem
       Jwt__Audience: BibliotecaUdem.Client
-      Jwt__SecretKey: CHANGE_ME_WITH_A_LONG_DEVELOPMENT_SECRET
       Jwt__ExpiresInMinutes: 60
+      Auth__AllowedEmailDomain: udem.edu
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,11 +1,14 @@
+using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Biblioteca.Application.DTOs.Auth;
 using Biblioteca.Application.Exceptions;
 using Biblioteca.Application.Interfaces.Auth;
 using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Usuarios;
+using Biblioteca.Application.Options;
 using Biblioteca.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Biblioteca.Application.Services.Auth;
 
@@ -14,12 +17,19 @@ public sealed class AuthService(
     IPasswordHasher<Usuario> passwordHasher,
     IJwtTokenGenerator jwtTokenGenerator,
     IDateTimeProvider dateTimeProvider,
+    IOptions<AuthOptions> authOptions,
     IMapper mapper) : IAuthService
 {
     public async Task<AuthResponseDto> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken)
     {
         var normalizedUsername = request.Username.Trim();
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
+        var allowedDomain = authOptions.Value.AllowedEmailDomain.TrimStart('@').ToLowerInvariant();
+        if (!normalizedEmail.EndsWith($"@{allowedDomain}", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ValidationException($"Solo se permiten correos institucionales @{allowedDomain}.");
+        }
 
         await usuarioRepository.EnsureReferenceDataAsync(cancellationToken);
 
