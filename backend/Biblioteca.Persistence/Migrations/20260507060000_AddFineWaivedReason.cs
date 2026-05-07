@@ -1,10 +1,13 @@
+using Biblioteca.Persistence.Context;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Biblioteca.Persistence.Migrations
 {
-    /// <inheritdoc />
+    [DbContext(typeof(BibliotecaDbContext))]
+    [Migration("20260507060000_AddFineWaivedReason")]
     public partial class AddFineWaivedReason : Migration
     {
         /// <inheritdoc />
