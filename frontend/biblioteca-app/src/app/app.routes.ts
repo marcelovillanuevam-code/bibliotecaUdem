@@ -6,6 +6,11 @@ import { LoginPageComponent } from './features/auth/pages/login-page/login-page.
 import { BooksPageComponent } from './features/books/pages/books-page/books-page.component';
 import { DashboardPageComponent } from './features/dashboard/pages/dashboard-page/dashboard-page.component';
 import { UsersPageComponent } from './features/users/pages/users-page/users-page.component';
+import { ReturnsPageComponent } from './features/devoluciones/pages/returns-page/returns-page.component';
+import { NewReturnPageComponent } from './features/devoluciones/pages/new-return-page/new-return-page.component';
+import { FinesPageComponent } from './features/multas/pages/fines-page/fines-page.component';
+import { FineDetailPageComponent } from './features/multas/pages/fine-detail-page/fine-detail-page.component';
+import { FineConfigPageComponent } from './features/multas/pages/fine-config-page/fine-config-page.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -38,6 +43,11 @@ export const routes: Routes = [
         title: 'Gestion Libros | Biblioteca UDEM'
       },
       {
+        path: 'dashboard/prestamos',
+        loadChildren: () =>
+          import('./features/prestamos/prestamos.routes').then((m) => m.PRESTAMOS_ROUTES)
+      },
+      {
         path: 'dashboard/perfil',
         component: DashboardPageComponent,
         title: 'Mi Perfil | Biblioteca UDEM'
@@ -46,6 +56,31 @@ export const routes: Routes = [
         path: 'usuarios',
         component: UsersPageComponent,
         title: 'Usuarios | Biblioteca UDEM'
+      },
+      {
+        path: 'dashboard/devoluciones',
+        component: ReturnsPageComponent,
+        title: 'Devoluciones | Biblioteca UDEM'
+      },
+      {
+        path: 'dashboard/devoluciones/nueva',
+        component: NewReturnPageComponent,
+        title: 'Nueva Devolución | Biblioteca UDEM'
+      },
+      {
+        path: 'dashboard/multas',
+        component: FinesPageComponent,
+        title: 'Multas | Biblioteca UDEM'
+      },
+      {
+        path: 'dashboard/multas/:id',
+        component: FineDetailPageComponent,
+        title: 'Detalle Multa | Biblioteca UDEM'
+      },
+      {
+        path: 'dashboard/configuracion/multas',
+        component: FineConfigPageComponent,
+        title: 'Configuración Multas | Biblioteca UDEM'
       }
     ]
   },

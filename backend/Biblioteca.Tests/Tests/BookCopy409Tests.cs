@@ -62,5 +62,6 @@ public sealed class BookCopy409Tests
         public Task<BookCopy> AddAsync(BookCopy copy, CancellationToken ct) => throw new NotImplementedException();
         public Task SaveChangesAsync(CancellationToken ct) => throw new NotImplementedException();
         public void SoftDelete(BookCopy copy) => throw new NotImplementedException();
+        public Task<int> CountAvailableByBookIdAsync(Guid bookId, CancellationToken ct) => Task.FromResult(0);
     }
 }

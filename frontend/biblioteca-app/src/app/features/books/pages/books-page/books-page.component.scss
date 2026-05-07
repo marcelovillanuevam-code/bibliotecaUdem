@@ -62,6 +62,8 @@
 .book-card__availability--ok .book-card__availability-dot { background: #2e8f65; }
 .book-card__availability--none { color: #a23a3f; }
 .book-card__availability--none .book-card__availability-dot { background: #d63f45; }
+.book-card__availability--no-copies { color: var(--slate-400); }
+.book-card__availability--no-copies .book-card__availability-dot { background: var(--slate-300); }
 
 /* Modal de ejemplares */
 .book-modal--copies { width: min(58rem, 100%); }

@@ -106,7 +106,8 @@
             <div
               class="book-card__availability"
               [class.book-card__availability--ok]="book.availableCopies > 0"
-              [class.book-card__availability--none]="book.availableCopies === 0"
+              [class.book-card__availability--none]="book.availableCopies === 0 && book.totalCopies > 0"
+              [class.book-card__availability--no-copies]="book.totalCopies === 0"
             >
               <span class="book-card__availability-dot"></span>
               <span>{{ book.availableCopies }} / {{ book.totalCopies }} disponibles</span>
