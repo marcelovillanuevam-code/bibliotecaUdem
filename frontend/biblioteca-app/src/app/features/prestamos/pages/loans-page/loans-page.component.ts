@@ -198,7 +198,7 @@ export class LoansPageComponent {
     const status = this.canManageLoans() && filters.status !== 'ALL' ? filters.status : null;
     const request = this.canManageLoans()
       ? this.loansApi.listLoans({ status })
-      : this.loansApi.listUserLoans(currentUserId);
+      : this.loansApi.listUserLoans(currentUserId ?? '');
 
     this.loading.set(true);
     this.errorMessage.set('');

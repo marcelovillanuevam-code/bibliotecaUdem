@@ -117,8 +117,21 @@
           <div class="book-card__actions">
             <button type="button" (click)="openDetail(book.id)">Consultar</button>
 
+            @if (showReserveButton(book)) {
+              <button
+                type="button"
+                class="book-card__reserve"
+                (click)="createReservation(book)"
+                [disabled]="isReserveDisabled(book)"
+                [attr.title]="reserveButtonTitle(book)"
+              >
+                {{ reserveButtonLabel(book) }}
+              </button>
+            }
+
             @if (isManageMode) {
               <button type="button" (click)="openCopies(book.id)">Ejemplares</button>
+              <button type="button" [routerLink]="['/dashboard/libros', book.id, 'reservas']">Cola</button>
               <button type="button" (click)="openEditEditor(book.id)">Editar</button>
               <button type="button" class="book-card__danger" (click)="removeBook(book)" [disabled]="isDeleting(book.id)">
                 {{ isDeleting(book.id) ? 'Bajando...' : 'Baja' }}

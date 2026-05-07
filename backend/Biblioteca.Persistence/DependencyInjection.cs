@@ -1,4 +1,5 @@
 using Biblioteca.Application.Interfaces.Common;
+using Biblioteca.Application.Interfaces.Dashboard;
 using Biblioteca.Application.Interfaces.Libros;
 using Biblioteca.Application.Interfaces.Loans;
 using Biblioteca.Application.Interfaces.Reservations;
@@ -23,8 +24,12 @@ public static class DependencyInjection
 
         services.AddDbContext<BibliotecaDbContext>(options =>
             options.UseNpgsql(connectionString));
+        services.AddDbContextFactory<BibliotecaDbContext>(
+            options => options.UseNpgsql(connectionString),
+            ServiceLifetime.Scoped);
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<BibliotecaDbContext>());
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<ILibroRepository, LibroRepository>();
         services.AddScoped<IBookCopyRepository, BookCopyRepository>();

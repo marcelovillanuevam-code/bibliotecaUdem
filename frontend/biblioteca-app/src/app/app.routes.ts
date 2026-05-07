@@ -1,17 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { roleGuard } from './core/guards/role.guard';
 import { AppShellComponent } from './core/layout/app-shell/app-shell.component';
 import { LoginPageComponent } from './features/auth/pages/login-page/login-page.component';
 import { BooksPageComponent } from './features/books/pages/books-page/books-page.component';
 import { DashboardPageComponent } from './features/dashboard/pages/dashboard-page/dashboard-page.component';
 import { UsersPageComponent } from './features/users/pages/users-page/users-page.component';
-import { ReturnsPageComponent } from './features/devoluciones/pages/returns-page/returns-page.component';
-import { NewReturnPageComponent } from './features/devoluciones/pages/new-return-page/new-return-page.component';
-import { FinesPageComponent } from './features/multas/pages/fines-page/fines-page.component';
-import { FineDetailPageComponent } from './features/multas/pages/fine-detail-page/fine-detail-page.component';
-import { FineConfigPageComponent } from './features/multas/pages/fine-config-page/fine-config-page.component';
-import { ReportsPageComponent } from './features/reportes/pages/reports-page/reports-page.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -38,6 +33,20 @@ export const routes: Routes = [
         title: 'Buscar Libros | Biblioteca UDEM'
       },
       {
+        path: 'dashboard/reservas',
+        loadChildren: () =>
+          import('./features/reservas/reservas.routes').then((m) => m.RESERVAS_ROUTES)
+      },
+      {
+        path: 'dashboard/libros/:id/reservas',
+        loadComponent: () =>
+          import('./features/reservas/pages/book-queue-page/book-queue-page.component').then(
+            (m) => m.BookQueuePageComponent
+          ),
+        canActivate: [roleGuard(['LIBRARIAN', 'ADMIN'])],
+        title: 'Cola de Reservas | Biblioteca UDEM'
+      },
+      {
         path: 'dashboard/libros',
         component: BooksPageComponent,
         data: { mode: 'manage' },
@@ -60,32 +69,50 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard/devoluciones',
-        component: ReturnsPageComponent,
+        loadComponent: () =>
+          import('./features/devoluciones/pages/returns-page/returns-page.component').then(
+            (m) => m.ReturnsPageComponent
+          ),
         title: 'Devoluciones | Biblioteca UDEM'
       },
       {
         path: 'dashboard/devoluciones/nueva',
-        component: NewReturnPageComponent,
+        loadComponent: () =>
+          import('./features/devoluciones/pages/new-return-page/new-return-page.component').then(
+            (m) => m.NewReturnPageComponent
+          ),
         title: 'Nueva Devolución | Biblioteca UDEM'
       },
       {
         path: 'dashboard/multas',
-        component: FinesPageComponent,
+        loadComponent: () =>
+          import('./features/multas/pages/fines-page/fines-page.component').then(
+            (m) => m.FinesPageComponent
+          ),
         title: 'Multas | Biblioteca UDEM'
       },
       {
         path: 'dashboard/multas/:id',
-        component: FineDetailPageComponent,
+        loadComponent: () =>
+          import('./features/multas/pages/fine-detail-page/fine-detail-page.component').then(
+            (m) => m.FineDetailPageComponent
+          ),
         title: 'Detalle Multa | Biblioteca UDEM'
       },
       {
         path: 'dashboard/configuracion/multas',
-        component: FineConfigPageComponent,
+        loadComponent: () =>
+          import('./features/multas/pages/fine-config-page/fine-config-page.component').then(
+            (m) => m.FineConfigPageComponent
+          ),
         title: 'Configuración Multas | Biblioteca UDEM'
       },
       {
         path: 'dashboard/reportes',
-        component: ReportsPageComponent,
+        loadComponent: () =>
+          import('./features/reportes/pages/reports-page/reports-page.component').then(
+            (m) => m.ReportsPageComponent
+          ),
         title: 'Reportes | Biblioteca UDEM'
       }
     ]

@@ -25,6 +25,9 @@ public sealed class ReservationRepository(BibliotecaDbContext dbContext) : IRese
     {
         var query = dbContext.Reservations
             .AsNoTracking()
+            .Include(r => r.User)
+                .ThenInclude(u => u!.Profile)
+            .Include(r => r.Book)
             .Where(r => r.UserId == userId);
 
         if (statusFilter.HasValue)
@@ -40,6 +43,9 @@ public sealed class ReservationRepository(BibliotecaDbContext dbContext) : IRese
     {
         var query = dbContext.Reservations
             .AsNoTracking()
+            .Include(r => r.User)
+                .ThenInclude(u => u!.Profile)
+            .Include(r => r.Book)
             .Where(r => r.BookId == bookId);
 
         if (statusFilter.HasValue)

@@ -33,6 +33,10 @@ export class FinesApiService {
     return this.http.get<FineRecord[]>(`${environment.apiBaseUrl}/usuarios/${userId}/multas`, { params });
   }
 
+  listUserFines(userId: string, status?: FineStatus): Observable<FineRecord[]> {
+    return this.getUserFines(userId, status);
+  }
+
   confirmPayment(fineId: string, request: ConfirmPaymentRequest): Observable<FineRecord> {
     return this.http.post<FineRecord>(`${environment.apiBaseUrl}/multas/${fineId}/pagos`, request);
   }

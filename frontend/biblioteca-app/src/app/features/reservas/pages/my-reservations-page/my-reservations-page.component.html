@@ -1,0 +1,113 @@
+<section class="reservations-page">
+  <header class="reservations-page__hero">
+    <div>
+      <p class="reservations-page__eyebrow">Reservas</p>
+      <h2>Mis reservas</h2>
+      <p>Consulta tu posicion en cola y retira los libros marcados como listos antes de que venza la ventana de 48h.</p>
+    </div>
+
+    <app-primary-button variant="secondary" routerLink="/dashboard/catalogo">
+      <span>Buscar libros</span>
+    </app-primary-button>
+  </header>
+
+  @if (toast(); as currentToast) {
+    <div class="reservations-page__feedback reservations-page__feedback--{{ currentToast.tone }}" role="status">
+      <span>{{ currentToast.message }}</span>
+      <button type="button" (click)="dismissToast()">Cerrar</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="reservations-page__feedback reservations-page__feedback--error" role="alert">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  <section class="reservations-split">
+    <article class="reservations-panel">
+      <header class="reservations-panel__head">
+        <div>
+          <h3>Activas</h3>
+          <p>{{ activeReservations().length }} reservas pendientes o listas</p>
+        </div>
+      </header>
+
+      @if (loading()) {
+        <div class="reservations-empty">Cargando tus reservas...</div>
+      } @else {
+        @for (reservation of activeReservations(); track trackByReservationId($index, reservation)) {
+          <article class="reservation-item reservation-item--{{ reservation.status.toLowerCase() }}">
+            <div class="reservation-item__head">
+              <div>
+                <span class="reservation-item__position">Posicion {{ reservation.queuePosition }}</span>
+                <h4>{{ reservation.bookTitle }}</h4>
+              </div>
+
+              <app-status-badge [label]="statusLabel(reservation.status)" [tone]="statusTone(reservation.status)" [dot]="true" />
+            </div>
+
+            <dl class="reservation-item__meta">
+              <div>
+                <dt>Creada</dt>
+                <dd>{{ formatDateTime(reservation.createdAt) }}</dd>
+              </div>
+              <div>
+                <dt>Lista</dt>
+                <dd>{{ formatDateTime(reservation.readyAt) }}</dd>
+              </div>
+            </dl>
+
+            @if (reservation.status === 'READY') {
+              <div class="reservation-item__ready">
+                <span>Vence en</span>
+                <strong>{{ countdownLabel(reservation) }}</strong>
+                <small>Limite: {{ formatDateTime(reservation.expiresAt) }}</small>
+              </div>
+            }
+
+            @if (canCancel(reservation)) {
+              <button
+                class="reservation-item__cancel"
+                type="button"
+                (click)="cancelReservation(reservation)"
+                [disabled]="isCancelling(reservation)"
+              >
+                {{ isCancelling(reservation) ? 'Cancelando...' : 'Cancelar' }}
+              </button>
+            }
+          </article>
+        } @empty {
+          <div class="reservations-empty">No tenes reservas activas.</div>
+        }
+      }
+    </article>
+
+    <article class="reservations-panel">
+      <header class="reservations-panel__head">
+        <div>
+          <h3>Historial</h3>
+          <p>{{ historyReservations().length }} reservas cerradas</p>
+        </div>
+      </header>
+
+      @if (loading()) {
+        <div class="reservations-empty">Cargando historial...</div>
+      } @else {
+        @for (reservation of historyReservations(); track trackByReservationId($index, reservation)) {
+          <article class="reservation-row">
+            <div>
+              <strong>{{ reservation.bookTitle }}</strong>
+              <small>Creada {{ formatDateTime(reservation.createdAt) }}</small>
+            </div>
+
+            <app-status-badge [label]="statusLabel(reservation.status)" [tone]="statusTone(reservation.status)" />
+          </article>
+        } @empty {
+          <div class="reservations-empty">Todavia no hay historial de reservas.</div>
+        }
+      }
+    </article>
+  </section>
+</section>
