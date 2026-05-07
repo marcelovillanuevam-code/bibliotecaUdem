@@ -15,6 +15,7 @@ public sealed class Fine
     public DateTime CreatedAt { get; set; }
     public DateTime? PaidAt { get; set; }
     public Guid? PaidByUserId { get; set; }
+    public string? WaivedReason { get; set; }
     public DateTime? DeletedAt { get; set; }
 
     public Return? Return { get; set; }

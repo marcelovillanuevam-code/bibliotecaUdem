@@ -86,6 +86,7 @@ export class MockLibraryDataService {
     { label: 'Devoluciones', route: '/dashboard/devoluciones', icon: 'returns' },
     { label: 'Multas', route: '/dashboard/multas', icon: 'fines' },
     { label: 'Config. Multas', route: '/dashboard/configuracion/multas', icon: 'config' },
+    { label: 'Reportes', route: '/dashboard/reportes', icon: 'reports' },
     { label: 'Mi Perfil', route: '/dashboard/perfil', icon: 'profile' }
   ];
 

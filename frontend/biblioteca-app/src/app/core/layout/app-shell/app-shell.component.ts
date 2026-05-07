@@ -9,7 +9,7 @@ import { TopbarComponent } from '../topbar/topbar.component';
 import { SupportFabComponent } from '../../../shared/ui/support-fab/support-fab.component';
 
 const LIBRARIAN_ROUTES = new Set(['/dashboard/libros', '/usuarios', '/dashboard/devoluciones']);
-const ADMIN_ROUTES = new Set(['/dashboard/configuracion/multas']);
+const ADMIN_ROUTES = new Set(['/dashboard/configuracion/multas', '/dashboard/reportes']);
 
 @Component({
   selector: 'app-shell',
@@ -66,6 +66,7 @@ export class AppShellComponent {
     if (url.startsWith('/dashboard/catalogo')) return 'Buscar Libros';
     if (url.startsWith('/dashboard/libros')) return 'Gestión Libros';
     if (url.startsWith('/dashboard/prestamos')) return 'Prestamos';
+    if (url.startsWith('/dashboard/reportes')) return 'Reportes';
     if (url.startsWith('/dashboard/perfil')) return 'Mi Perfil';
 
     return 'Dashboard';

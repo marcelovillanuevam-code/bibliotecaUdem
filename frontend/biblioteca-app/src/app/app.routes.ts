@@ -11,6 +11,7 @@ import { NewReturnPageComponent } from './features/devoluciones/pages/new-return
 import { FinesPageComponent } from './features/multas/pages/fines-page/fines-page.component';
 import { FineDetailPageComponent } from './features/multas/pages/fine-detail-page/fine-detail-page.component';
 import { FineConfigPageComponent } from './features/multas/pages/fine-config-page/fine-config-page.component';
+import { ReportsPageComponent } from './features/reportes/pages/reports-page/reports-page.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -81,6 +82,11 @@ export const routes: Routes = [
         path: 'dashboard/configuracion/multas',
         component: FineConfigPageComponent,
         title: 'Configuración Multas | Biblioteca UDEM'
+      },
+      {
+        path: 'dashboard/reportes',
+        component: ReportsPageComponent,
+        title: 'Reportes | Biblioteca UDEM'
       }
     ]
   },
