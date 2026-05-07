@@ -200,7 +200,7 @@ public sealed class RuleBasedChatbotTests
 
         var res = await provider.AskAsync("mis préstamos", UserId, default);
 
-        res.Reply.Should().Be("No tenés préstamos activos.");
+        res.Reply.Should().Be("No tienes préstamos activos.");
         res.Actions.Should().BeNull();
     }
 

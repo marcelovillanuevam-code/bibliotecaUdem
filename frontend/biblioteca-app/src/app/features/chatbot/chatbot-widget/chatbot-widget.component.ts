@@ -6,7 +6,7 @@ import { ChatAction, ChatMessage } from '../../../shared/models/chatbot.model';
 
 const WELCOME: ChatMessage = {
   role: 'bot',
-  text: '¡Hola! Soy el asistente de la biblioteca UDEM. Podés preguntarme sobre libros, tus multas, préstamos, horarios y más.',
+  text: '¡Hola! Soy el asistente de la biblioteca UDEM. Puedes preguntarme sobre libros, tus multas, préstamos, horarios y más.',
   timestamp: new Date()
 };
 
@@ -69,7 +69,7 @@ export class ChatbotWidgetComponent {
         error: () => {
           this.messages.update(msgs => [...msgs, {
             role: 'bot',
-            text: 'Hubo un error al procesar tu mensaje. Intentá de nuevo.',
+            text: 'Hubo un error al procesar tu mensaje. Intenta de nuevo.',
             timestamp: new Date()
           }]);
           this.loading.set(false);

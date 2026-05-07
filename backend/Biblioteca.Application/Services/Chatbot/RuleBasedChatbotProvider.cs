@@ -45,7 +45,7 @@ public sealed class RuleBasedChatbotProvider(
         "Correo: biblioteca@udem.edu | Teléfono: (81) 8215-1000 ext. 7000";
 
     private const string DefaultReply =
-        "No entendí ese mensaje. Podés preguntarme:\n• buscar <título>\n• mis multas\n• mis préstamos\n• horario\n• ubicación\n• contacto";
+        "No entendí tu mensaje. Puedes preguntarme:\n• buscar <título>\n• mis multas\n• mis préstamos\n• horario\n• ubicación\n• contacto";
 
     public async Task<ChatResponse> AskAsync(string message, Guid userId, CancellationToken ct)
     {
@@ -79,7 +79,7 @@ public sealed class RuleBasedChatbotProvider(
         var top3 = books.Take(3).ToList();
 
         if (top3.Count == 0)
-            return new ChatResponse($"No encontré libros para \"{query}\". Intentá con otro título.", null);
+            return new ChatResponse($"No encontré libros para \"{query}\". Intenta con otro título.", null);
 
         var actions = top3
             // TODO: cambiar a /dashboard/libros/{id} cuando exista la ruta de detalle de libro
@@ -104,7 +104,7 @@ public sealed class RuleBasedChatbotProvider(
             return new ChatResponse("Sin multas pendientes.", null);
 
         var total = fines.Sum(f => f.Amount);
-        var sb = new StringBuilder($"Tenés {fines.Count} multa(s) pendiente(s) por ${total:0.00}:");
+        var sb = new StringBuilder($"Tienes {fines.Count} multa(s) pendiente(s) por ${total:0.00}:");
         foreach (var fine in fines)
             sb.Append($"\n• ${fine.Amount:0.00} — {fine.Reason} ({fine.CreatedAt:dd/MM/yyyy})");
 
@@ -119,9 +119,9 @@ public sealed class RuleBasedChatbotProvider(
             .ToList();
 
         if (active.Count == 0)
-            return new ChatResponse("No tenés préstamos activos.", null);
+            return new ChatResponse("No tienes préstamos activos.", null);
 
-        var sb = new StringBuilder($"Tenés {active.Count} préstamo(s) activo(s):");
+        var sb = new StringBuilder($"Tienes {active.Count} préstamo(s) activo(s):");
         foreach (var loan in active)
         {
             var title = loan.BookCopy?.Book?.Title ?? "Libro desconocido";
