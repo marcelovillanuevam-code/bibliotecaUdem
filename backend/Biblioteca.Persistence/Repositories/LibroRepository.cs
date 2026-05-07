@@ -11,15 +11,10 @@ public sealed class LibroRepository(
     BibliotecaDbContext dbContext,
     IDateTimeProvider dateTimeProvider) : ILibroRepository
 {
-    public async Task<IReadOnlyCollection<Libro>> GetAllAsync(GetLibrosRequest request, CancellationToken cancellationToken)
+    public async Task<IReadOnlyCollection<LibroDto>> GetAllAsync(GetLibrosRequest request, CancellationToken cancellationToken)
     {
-        var query = dbContext.Books
-            .AsNoTracking()
-            .Include(libro => libro.Authors)
-                .ThenInclude(libroAutor => libroAutor.Author)
-            .Include(libro => libro.Subjects)
-                .ThenInclude(libroMateria => libroMateria.Subject)
-            .AsQueryable();
+        // Query 1: libros con autores y materias (HasQueryFilter excluye deleted_at != null automáticamente)
+        IQueryable<Libro> query = dbContext.Books.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(request.Title))
         {
@@ -65,9 +60,59 @@ public sealed class LibroRepository(
             query = query.Where(libro => EF.Functions.ILike(libro.Language, language));
         }
 
-        return await query
+        var libros = await query
+            .Include(libro => libro.Authors)
+                .ThenInclude(libroAutor => libroAutor.Author)
+            .Include(libro => libro.Subjects)
+                .ThenInclude(libroMateria => libroMateria.Subject)
             .OrderBy(libro => libro.Title)
             .ToListAsync(cancellationToken);
+
+        if (libros.Count == 0)
+            return [];
+
+        // Query 2: conteos de copias agrupados por libro (HasQueryFilter excluye deleted_at != null)
+        var bookIds = libros.Select(l => l.Id).ToList();
+        var copyCountsList = await dbContext.BookCopies
+            .AsNoTracking()
+            .Where(bc => bookIds.Contains(bc.BookId))
+            .GroupBy(bc => bc.BookId)
+            .Select(g => new
+            {
+                BookId = g.Key,
+                Total = g.Count(),
+                Available = g.Count(bc => bc.Status == BookCopyStatus.Available)
+            })
+            .ToListAsync(cancellationToken);
+
+        var copyCounts = copyCountsList.ToDictionary(c => c.BookId);
+
+        return libros.Select(libro =>
+        {
+            copyCounts.TryGetValue(libro.Id, out var counts);
+            return new LibroDto(
+                libro.Id,
+                libro.Title,
+                libro.Subtitle,
+                libro.Isbn,
+                libro.Publisher,
+                libro.PublicationYear,
+                libro.Edition,
+                libro.Language,
+                libro.Authors
+                    .OrderBy(la => la.Author != null ? la.Author.FullName : string.Empty)
+                    .Select(la => new LibroAutorDto(la.AuthorId, la.Author?.FullName ?? string.Empty, la.Contribution))
+                    .ToArray(),
+                libro.Subjects
+                    .OrderBy(lm => lm.Subject != null ? lm.Subject.Name : string.Empty)
+                    .Select(lm => new LibroMateriaDto(lm.SubjectId, lm.Subject?.Code ?? string.Empty, lm.Subject?.Name ?? string.Empty))
+                    .ToArray(),
+                libro.CreatedAt,
+                libro.UpdatedAt,
+                counts?.Total ?? 0,
+                counts?.Available ?? 0
+            );
+        }).ToList().AsReadOnly();
     }
 
     public async Task<Libro?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -78,6 +123,7 @@ public sealed class LibroRepository(
                 .ThenInclude(libroAutor => libroAutor.Author)
             .Include(libro => libro.Subjects)
                 .ThenInclude(libroMateria => libroMateria.Subject)
+            .Include(libro => libro.Copies)
             .FirstOrDefaultAsync(libro => libro.Id == id, cancellationToken);
     }
 

@@ -16,8 +16,7 @@ public sealed class LibroService(
 {
     public async Task<IReadOnlyCollection<LibroDto>> GetAllAsync(GetLibrosRequest request, CancellationToken cancellationToken)
     {
-        var libros = await libroRepository.GetAllAsync(request, cancellationToken);
-        return mapper.Map<IReadOnlyCollection<LibroDto>>(libros);
+        return await libroRepository.GetAllAsync(request, cancellationToken);
     }
 
     public async Task<LibroFichaDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)

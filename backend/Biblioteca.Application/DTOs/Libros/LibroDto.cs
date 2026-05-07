@@ -12,4 +12,6 @@ public sealed record LibroDto(
     IReadOnlyCollection<LibroAutorDto> Authors,
     IReadOnlyCollection<LibroMateriaDto> Subjects,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    int TotalCopies,
+    int AvailableCopies);

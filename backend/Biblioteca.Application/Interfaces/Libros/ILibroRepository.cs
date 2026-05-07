@@ -5,7 +5,7 @@ namespace Biblioteca.Application.Interfaces.Libros;
 
 public interface ILibroRepository
 {
-    Task<IReadOnlyCollection<Libro>> GetAllAsync(GetLibrosRequest request, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<LibroDto>> GetAllAsync(GetLibrosRequest request, CancellationToken cancellationToken);
     Task<Libro?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Libro?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken);
     Task<bool> IsbnExistsAsync(string isbn, CancellationToken cancellationToken, Guid? excludedBookId = null);

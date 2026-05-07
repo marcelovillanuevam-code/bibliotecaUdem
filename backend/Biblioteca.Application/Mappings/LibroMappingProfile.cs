@@ -21,16 +21,6 @@ public sealed class LibroMappingProfile : Profile
             .ForCtorParam(nameof(LibroMateriaDto.Name), opt => opt.MapFrom(src =>
                 src.Subject != null ? src.Subject.Name : string.Empty));
 
-        CreateMap<Libro, LibroDto>()
-            .ForCtorParam(nameof(LibroDto.Authors), opt => opt.MapFrom(src =>
-                src.Authors
-                    .OrderBy(author => author.Author != null ? author.Author.FullName : string.Empty)
-                    .ToArray()))
-            .ForCtorParam(nameof(LibroDto.Subjects), opt => opt.MapFrom(src =>
-                src.Subjects
-                    .OrderBy(subject => subject.Subject != null ? subject.Subject.Name : string.Empty)
-                    .ToArray()));
-
         CreateMap<Libro, LibroFichaDto>()
             .ForCtorParam(nameof(LibroFichaDto.Authors), opt => opt.MapFrom(src =>
                 src.Authors
@@ -39,6 +29,9 @@ public sealed class LibroMappingProfile : Profile
             .ForCtorParam(nameof(LibroFichaDto.Subjects), opt => opt.MapFrom(src =>
                 src.Subjects
                     .OrderBy(subject => subject.Subject != null ? subject.Subject.Name : string.Empty)
-                    .ToArray()));
+                    .ToArray()))
+            .ForCtorParam(nameof(LibroFichaDto.TotalCopies), opt => opt.MapFrom(src => src.Copies.Count))
+            .ForCtorParam(nameof(LibroFichaDto.AvailableCopies), opt => opt.MapFrom(src =>
+                src.Copies.Count(c => c.Status == BookCopyStatus.Available)));
     }
 }
