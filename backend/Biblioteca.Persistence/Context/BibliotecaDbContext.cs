@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Biblioteca.Persistence.Context;
 
@@ -44,8 +46,6 @@ public sealed class BibliotecaDbContext(
     private List<RegistroAuditoria> CreateAuditEntries()
     {
         var userId = currentUserService.CurrentUserId;
-        if (userId is null) return [];
-
         var now = DateTime.UtcNow;
         var entries = new List<RegistroAuditoria>();
 
@@ -73,11 +73,42 @@ public sealed class BibliotecaDbContext(
                 RecordId = recordId,
                 Action = action,
                 PerformedBy = userId,
-                PerformedAt = now
+                PerformedAt = now,
+                ChangedDataJson = BuildChangedDataJson(entityEntry)
             });
         }
 
         return entries;
+    }
+
+    private static string? BuildChangedDataJson(EntityEntry entityEntry)
+    {
+        var props = entityEntry.Properties.ToList();
+
+        if (entityEntry.State == EntityState.Added)
+            return JsonSerializer.Serialize(new
+            {
+                after = props.ToDictionary(p => p.Metadata.Name, p => p.CurrentValue)
+            });
+
+        if (entityEntry.State == EntityState.Modified)
+        {
+            var changed = props.Where(p => p.IsModified).ToList();
+            if (changed.Count == 0) return null;
+            return JsonSerializer.Serialize(new
+            {
+                before = changed.ToDictionary(p => p.Metadata.Name, p => p.OriginalValue),
+                after = changed.ToDictionary(p => p.Metadata.Name, p => p.CurrentValue)
+            });
+        }
+
+        if (entityEntry.State == EntityState.Deleted)
+            return JsonSerializer.Serialize(new
+            {
+                before = props.ToDictionary(p => p.Metadata.Name, p => p.OriginalValue)
+            });
+
+        return null;
     }
 
     private static (string? TableName, Guid? RecordId) GetAuditInfo(object entity) =>
