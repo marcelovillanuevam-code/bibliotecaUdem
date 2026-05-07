@@ -38,6 +38,11 @@ export const routes: Routes = [
         title: 'Gestion Libros | Biblioteca UDEM'
       },
       {
+        path: 'dashboard/prestamos',
+        loadChildren: () =>
+          import('./features/prestamos/prestamos.routes').then((m) => m.PRESTAMOS_ROUTES)
+      },
+      {
         path: 'dashboard/perfil',
         component: DashboardPageComponent,
         title: 'Mi Perfil | Biblioteca UDEM'

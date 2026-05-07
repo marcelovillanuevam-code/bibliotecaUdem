@@ -82,6 +82,7 @@ export class MockLibraryDataService {
     { label: 'Usuarios', route: '/usuarios', icon: 'users' },
     { label: 'Buscar Libros', route: '/dashboard/catalogo', icon: 'search' },
     { label: 'Gestion Libros', route: '/dashboard/libros', icon: 'library' },
+    { label: 'Prestamos', route: '/dashboard/prestamos', icon: 'loans' },
     { label: 'Mi Perfil', route: '/dashboard/perfil', icon: 'profile' }
   ];
 
@@ -236,11 +237,11 @@ export class MockLibraryDataService {
       icon: 'users'
     },
     {
-      title: 'Gestionar Libros',
-      description: 'Alta de catalogo y ficha bibliografica.',
-      route: '/dashboard',
+      title: 'Registrar Prestamo',
+      description: 'Emite prestamos y consulta el historial activo.',
+      route: '/dashboard/prestamos',
       tone: 'violet',
-      icon: 'books'
+      icon: 'loans'
     },
     {
       title: 'Buscar Recursos',

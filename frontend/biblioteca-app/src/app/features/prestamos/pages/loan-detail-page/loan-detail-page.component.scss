@@ -1,0 +1,31 @@
+.loan-detail-page { display: grid; gap: 1.25rem; animation: page-enter 280ms ease; }
+.loan-detail-page__hero, .loan-detail-card, .renewals-panel, .loan-toast { border: 1px solid var(--line-soft); border-radius: 1.8rem; background: rgba(255, 255, 255, 0.96); }
+.loan-detail-page__hero { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 1.4rem; background: radial-gradient(circle at top left, rgba(49, 88, 184, 0.08), transparent 26%), rgba(255, 255, 255, 0.96); }
+.loan-detail-page__eyebrow { margin: 0 0 0.45rem; color: var(--brand-600); font-size: 0.82rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.loan-detail-page__hero h2, .loan-detail-page__hero p, .loan-detail-card__head h3, .loan-detail-card__head p, .loan-detail-grid h4, .loan-detail-grid p, .renewals-panel h3, .renewals-panel p { margin: 0; }
+.loan-detail-page__hero h2 { color: var(--slate-950); font-size: clamp(2rem, 1.55rem + 1vw, 2.6rem); }
+.loan-detail-page__hero p, .loan-detail-card__head p, .loan-detail-grid p, .renewals-panel p, .loan-detail-card__actions small, .renewal-row small { color: var(--slate-500); }
+.loan-toast { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.2rem; }
+.loan-toast--success { color: #1f6a4f; background: rgba(46, 143, 101, 0.1); }
+.loan-toast--error { color: #a23a3f; background: rgba(214, 63, 69, 0.08); }
+.loan-toast button { border: 0; background: transparent; color: inherit; font: inherit; font-weight: 800; cursor: pointer; }
+.loan-detail-card { display: grid; gap: 1.25rem; padding: 1.35rem; }
+.loan-detail-card--empty { color: var(--slate-500); text-align: center; }
+.loan-detail-card__head { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1.25rem; border-radius: 1.5rem; background: linear-gradient(135deg, #24408d, #3153c0); color: white; }
+.loan-detail-card__head h3 { margin-top: 0.45rem; font-size: clamp(1.45rem, 1.1rem + 0.9vw, 2.1rem); }
+.loan-detail-card__head p { color: rgba(255, 255, 255, 0.76); }
+.loan-detail-card__code { display: inline-flex; max-width: 100%; overflow-wrap: anywhere; padding: 0.35rem 0.65rem; border-radius: 999px; background: rgba(255, 255, 255, 0.16); font-size: 0.82rem; font-weight: 800; }
+.loan-detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.loan-detail-grid article { padding: 1rem 1.1rem; border: 1px solid var(--line-soft); border-radius: 1.3rem; background: var(--surface-subtle); }
+.loan-detail-grid h4 { margin-bottom: 0.4rem; color: var(--slate-900); font-size: 0.95rem; }
+.loan-detail-card__actions { display: flex; align-items: center; gap: 0.9rem; }
+.renewals-panel { display: grid; gap: 0.8rem; padding: 1.25rem; }
+.renewals-panel header { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
+.renewals-panel h3 { color: var(--slate-950); font-size: 1.2rem; }
+.renewal-row, .renewals-panel__empty { padding: 1rem 1.1rem; border: 1px solid var(--line-soft); border-radius: 1.2rem; background: var(--surface-subtle); }
+.renewal-row { display: grid; grid-template-columns: 12rem 1fr auto; gap: 0.75rem; align-items: center; }
+.renewal-row span { color: var(--slate-600); font-weight: 700; }
+.renewal-row strong { color: var(--slate-950); }
+.renewals-panel__empty { color: var(--slate-500); text-align: center; }
+@media (max-width: 72rem) { .loan-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .renewal-row { grid-template-columns: 1fr; } }
+@media (max-width: 56rem) { .loan-detail-page__hero, .loan-detail-card__head, .loan-detail-card__actions, .renewals-panel header { flex-direction: column; align-items: stretch; } .loan-detail-grid { grid-template-columns: 1fr; } }

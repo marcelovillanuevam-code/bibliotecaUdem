@@ -11,4 +11,5 @@ public sealed record LoanDto(
     DateTime DueAt,
     DateTime? ReturnedAt,
     string Status,
-    int RenewalCount);
+    int RenewalCount,
+    IReadOnlyCollection<LoanRenewalDto> Renewals);

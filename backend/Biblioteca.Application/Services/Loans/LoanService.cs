@@ -180,5 +180,15 @@ public sealed class LoanService(
         l.DueAt,
         l.ReturnedAt,
         Status: l.Status.ToString(),
-        l.RenewalCount);
+        l.RenewalCount,
+        Renewals: l.Renewals
+            .OrderBy(r => r.RenewedAt)
+            .Select(r => new LoanRenewalDto(
+                r.Id,
+                r.LoanId,
+                r.RenewedAt,
+                r.PreviousDueAt,
+                r.NewDueAt,
+                r.RenewedByUserId))
+            .ToList());
 }

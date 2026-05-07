@@ -67,11 +67,19 @@ public sealed class PrestamosController(
     [HttpPost("{id:guid}/renovaciones")]
     [Authorize(Policy = AuthPolicies.Authenticated)]
     [ProducesResponseType(typeof(LoanDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<ActionResult<LoanDto>> RenewAsync(Guid id, CancellationToken ct)
     {
         if (currentUserService.CurrentUserId is not { } requestedBy)
             return Unauthorized();
+
+        var existing = await loanService.GetByIdAsync(id, ct);
+        if (existing is null) return NotFound();
+
+        if (!User.IsInRole("ADMIN") && !User.IsInRole("LIBRARIAN") && existing.UserId != requestedBy)
+            return Forbid();
 
         var loan = await loanService.RenewAsync(id, requestedBy, ct);
         return Ok(loan);

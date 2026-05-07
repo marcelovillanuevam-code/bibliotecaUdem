@@ -1,0 +1,147 @@
+<section class="new-loan-page">
+  <header class="new-loan-page__hero">
+    <div>
+      <p class="new-loan-page__eyebrow">Mostrador</p>
+      <h2>Registrar prestamo</h2>
+      <p>Selecciona usuario, titulo, ejemplar disponible y fecha de devolucion.</p>
+    </div>
+
+    <app-primary-button variant="secondary" routerLink="/dashboard/prestamos">
+      <span>Volver</span>
+    </app-primary-button>
+  </header>
+
+  @if (toast(); as currentToast) {
+    <div class="loan-toast loan-toast--{{ currentToast.tone }}" role="status">
+      <span>{{ currentToast.message }}</span>
+      <button type="button" (click)="dismissToast()">Cerrar</button>
+    </div>
+  }
+
+  <form class="new-loan-form" [formGroup]="form" (ngSubmit)="submit()">
+    <section class="new-loan-form__panel">
+      <div class="new-loan-form__head">
+        <span>1</span>
+        <div>
+          <h3>Usuario</h3>
+          <p>Busca por username, correo o nombre.</p>
+        </div>
+      </div>
+
+      <label class="new-loan-form__field autocomplete">
+        <span>Usuario</span>
+        <input
+          type="text"
+          formControlName="userQuery"
+          autocomplete="off"
+          placeholder="lramirez o l.ramirez@udem.edu"
+          (input)="updateUserQuery($any($event.target).value)"
+        />
+        @if (loadingUsers()) {
+          <small>Cargando usuarios...</small>
+        } @else if (hasFieldError('userQuery')) {
+          <small>{{ fieldErrorMessage('userQuery') }}</small>
+        } @else if (hasSelectionError('userId')) {
+          <small>Selecciona un usuario del listado.</small>
+        } @else if (selectedUserHint()) {
+          <small>{{ selectedUserHint() }}</small>
+        }
+
+        @if (showUserMatches()) {
+          <div class="autocomplete__menu">
+            @for (user of userMatches(); track user.id) {
+              <button type="button" (click)="selectUser(user)">
+                <strong>{{ fullName(user) }}</strong>
+                <span>{{ user.username }} - {{ user.email }}</span>
+              </button>
+            }
+          </div>
+        }
+      </label>
+    </section>
+
+    <section class="new-loan-form__panel">
+      <div class="new-loan-form__head">
+        <span>2</span>
+        <div>
+          <h3>Libro y ejemplar</h3>
+          <p>Solo se pueden emitir ejemplares en estado AVAILABLE.</p>
+        </div>
+      </div>
+
+      <label class="new-loan-form__field autocomplete">
+        <span>Libro</span>
+        <input
+          type="text"
+          formControlName="bookQuery"
+          autocomplete="off"
+          placeholder="Calculo o ISBN"
+          (input)="updateBookQuery($any($event.target).value)"
+        />
+        @if (loadingBooks()) {
+          <small>Cargando libros...</small>
+        } @else if (hasFieldError('bookQuery')) {
+          <small>{{ fieldErrorMessage('bookQuery') }}</small>
+        } @else if (hasSelectionError('bookId')) {
+          <small>Selecciona un libro del listado.</small>
+        }
+
+        @if (showBookMatches()) {
+          <div class="autocomplete__menu">
+            @for (book of bookMatches(); track book.id) {
+              <button type="button" (click)="selectBook(book)">
+                <strong>{{ book.title }}</strong>
+                <span>ISBN {{ book.isbn || 'N/A' }} - {{ book.availableCopies }} disponibles</span>
+              </button>
+            }
+          </div>
+        }
+      </label>
+
+      <label class="new-loan-form__field">
+        <span>Ejemplar disponible</span>
+        <select formControlName="bookCopyId" [disabled]="copiesLoading() || availableCopies().length === 0">
+          <option value="">Selecciona un ejemplar</option>
+          @for (copy of availableCopies(); track copy.id) {
+            <option [value]="copy.id">{{ copyLabel(copy) }}</option>
+          }
+        </select>
+        @if (copiesLoading()) {
+          <small>Cargando ejemplares...</small>
+        } @else if (copyMessage()) {
+          <small>{{ copyMessage() }}</small>
+        } @else if (hasFieldError('bookCopyId')) {
+          <small>{{ fieldErrorMessage('bookCopyId') }}</small>
+        }
+      </label>
+    </section>
+
+    <section class="new-loan-form__panel">
+      <div class="new-loan-form__head">
+        <span>3</span>
+        <div>
+          <h3>Fecha de devolucion</h3>
+          <p>El valor inicial se ajusta al rol del usuario seleccionado.</p>
+        </div>
+      </div>
+
+      <label class="new-loan-form__field">
+        <span>Fecha limite</span>
+        <input type="date" formControlName="dueDate" [min]="minDueDate" />
+        @if (hasFieldError('dueDate')) {
+          <small>{{ fieldErrorMessage('dueDate') }}</small>
+        }
+      </label>
+    </section>
+
+    <div class="new-loan-form__actions">
+      <app-primary-button variant="secondary" routerLink="/dashboard/prestamos">
+        <span>Cancelar</span>
+      </app-primary-button>
+
+      <app-primary-button type="submit" [disabled]="saving()">
+        <span>{{ saving() ? 'Registrando...' : 'Registrar' }}</span>
+      </app-primary-button>
+    </div>
+  </form>
+</section>

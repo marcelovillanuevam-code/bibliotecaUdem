@@ -56,6 +56,10 @@ export class AppShellComponent {
       return 'Gestión Libros';
     }
 
+    if (this.router.url.startsWith('/dashboard/prestamos')) {
+      return 'Prestamos';
+    }
+
     if (this.router.url.startsWith('/dashboard/perfil')) {
       return 'Mi Perfil';
     }

@@ -1,0 +1,101 @@
+<section class="loan-detail-page">
+  <header class="loan-detail-page__hero">
+    <div>
+      <p class="loan-detail-page__eyebrow">Detalle</p>
+      <h2>Prestamo</h2>
+      <p>Consulta datos del prestamo y su historial de renovaciones.</p>
+    </div>
+
+    <app-primary-button variant="secondary" routerLink="/dashboard/prestamos">
+      <span>Volver</span>
+    </app-primary-button>
+  </header>
+
+  @if (toast(); as currentToast) {
+    <div class="loan-toast loan-toast--{{ currentToast.tone }}" role="status">
+      <span>{{ currentToast.message }}</span>
+      <button type="button" (click)="dismissToast()">Cerrar</button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="loan-toast loan-toast--error" role="alert">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <article class="loan-detail-card loan-detail-card--empty">Cargando prestamo desde la API...</article>
+  } @else if (loan(); as currentLoan) {
+    <article class="loan-detail-card">
+      <header class="loan-detail-card__head">
+        <div>
+          <span class="loan-detail-card__code">{{ currentLoan.id }}</span>
+          <h3>{{ currentLoan.bookTitle }}</h3>
+          <p>ISBN {{ currentLoan.isbn }}</p>
+        </div>
+
+        <app-status-badge
+          [label]="statusLabel(currentLoan.status)"
+          [tone]="statusTone(currentLoan.status)"
+          [dot]="true"
+        />
+      </header>
+
+      <section class="loan-detail-grid">
+        <article>
+          <h4>Usuario</h4>
+          <p>{{ currentLoan.userFullName }}</p>
+        </article>
+        <article>
+          <h4>Ejemplar</h4>
+          <p>{{ currentLoan.bookCopyId }}</p>
+        </article>
+        <article>
+          <h4>Prestado</h4>
+          <p>{{ formatDateTime(currentLoan.loanedAt) }}</p>
+        </article>
+        <article>
+          <h4>Fecha limite</h4>
+          <p>{{ formatDateTime(currentLoan.dueAt) }}</p>
+        </article>
+        <article>
+          <h4>Devuelto</h4>
+          <p>{{ currentLoan.returnedAt ? formatDateTime(currentLoan.returnedAt) : 'Pendiente' }}</p>
+        </article>
+        <article>
+          <h4>Renovaciones</h4>
+          <p>{{ renewalLimitText(currentLoan) }}</p>
+        </article>
+      </section>
+
+      <div class="loan-detail-card__actions">
+        <app-primary-button (click)="renew()" [disabled]="!canRenew() || renewing()">
+          <span>{{ renewing() ? 'Renovando...' : 'Renovar' }}</span>
+        </app-primary-button>
+
+        @if (!canRenew()) {
+          <small>Disponible solo para prestamos ACTIVE, propietarios o staff, con menos de 2 renovaciones.</small>
+        }
+      </div>
+    </article>
+
+    <article class="renewals-panel">
+      <header>
+        <h3>Historial de renovaciones</h3>
+        <p>{{ currentLoan.renewals.length }} movimientos</p>
+      </header>
+
+      @for (renewal of currentLoan.renewals; track renewal.id) {
+        <div class="renewal-row">
+          <span>{{ formatDateTime(renewal.renewedAt) }}</span>
+          <strong>{{ formatDate(renewal.previousDueAt) }} -> {{ formatDate(renewal.newDueAt) }}</strong>
+          <small>Renovado por {{ renewal.renewedByUserId }}</small>
+        </div>
+      } @empty {
+        <div class="renewals-panel__empty">Este prestamo no tiene renovaciones registradas.</div>
+      }
+    </article>
+  }
+</section>
