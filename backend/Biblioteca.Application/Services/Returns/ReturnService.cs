@@ -18,6 +18,12 @@ public sealed class ReturnService(
     IUnitOfWork unitOfWork,
     IDateTimeProvider clock) : IReturnService
 {
+    public async Task<List<ReturnDto>> ListAsync(CancellationToken ct)
+    {
+        var returns = await returnRepository.ListAsync(ct);
+        return returns.Select(r => MapToDto(r, r.Fine is not null ? [r.Fine] : [])).ToList();
+    }
+
     public async Task<ReturnDto> CreateAsync(CreateReturnRequest request, Guid receivedBy, CancellationToken ct)
     {
         var loan = await loanRepository.GetByIdForUpdateAsync(request.LoanId, ct)

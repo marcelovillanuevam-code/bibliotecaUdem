@@ -35,6 +35,14 @@ public sealed class RuleBasedChatbotProvider(
     private static readonly Regex Contact =
         new(@"\b(contacto|tel[eé]fono|correo|email|comunicar)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    private static readonly Regex Help =
+        new(@"\b(ayuda|help|comandos?|qu[eé]\s+puedes?\s+hacer|qu[eé]\s+sabes?\s+hacer|c[oó]mo\s+funciona[s]?)\b",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static readonly Regex Greeting =
+        new(@"\b(hola|hi|hey|buenas?|buen\s+d[ií]a|buenos?\s+(d[ií]as?|tardes?|noches?))\b",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
     private const string ScheduleReply =
         "La biblioteca UDEM abre de lunes a viernes de 7:00 a 22:00, y sábados de 8:00 a 14:00.";
 
@@ -43,6 +51,25 @@ public sealed class RuleBasedChatbotProvider(
 
     private const string ContactReply =
         "Correo: biblioteca@udem.edu | Teléfono: (81) 8215-1000 ext. 7000";
+
+    private const string GreetingReply =
+        "¡Hola! Soy el asistente de la Biblioteca UDEM. Puedo ayudarte con:\n" +
+        "• buscar <título> — buscar libros en el catálogo\n" +
+        "• mis préstamos — ver tus préstamos activos\n" +
+        "• mis multas — consultar multas pendientes\n" +
+        "• horario — horario de atención\n" +
+        "• ubicación — dónde encontrarnos\n" +
+        "• contacto — correo y teléfono\n\n" +
+        "Escribe 'ayuda' si necesitas ejemplos detallados.";
+
+    private const string HelpReply =
+        "Aquí tienes todo lo que puedo hacer:\n\n" +
+        "• Escribe 'buscar Harry Potter' para buscar libros en el catálogo\n" +
+        "• Escribe 'mis préstamos' para ver tus préstamos activos y fechas de vencimiento\n" +
+        "• Escribe 'mis multas' para consultar multas pendientes\n" +
+        "• Escribe 'horario' para ver el horario de atención\n" +
+        "• Escribe 'ubicación' para saber dónde estamos\n" +
+        "• Escribe 'contacto' para obtener correo y teléfono";
 
     private const string DefaultReply =
         "No entendí tu mensaje. Puedes preguntarme:\n• buscar <título>\n• mis multas\n• mis préstamos\n• horario\n• ubicación\n• contacto";
@@ -69,6 +96,12 @@ public sealed class RuleBasedChatbotProvider(
 
         if (Contact.IsMatch(m))
             return new ChatResponse(ContactReply, null);
+
+        if (Help.IsMatch(m))
+            return new ChatResponse(HelpReply, null);
+
+        if (Greeting.IsMatch(m))
+            return new ChatResponse(GreetingReply, null);
 
         return new ChatResponse(DefaultReply, null);
     }

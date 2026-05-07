@@ -12,4 +12,7 @@ public sealed record LoanDto(
     DateTime? ReturnedAt,
     string Status,
     int RenewalCount,
-    IReadOnlyCollection<LoanRenewalDto> Renewals);
+    IReadOnlyCollection<LoanRenewalDto> Renewals,
+    string CopyBarcode,
+    string BorrowerName,
+    string BorrowerEmail);

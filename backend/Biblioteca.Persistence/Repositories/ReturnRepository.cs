@@ -7,6 +7,13 @@ namespace Biblioteca.Persistence.Repositories;
 
 public sealed class ReturnRepository(BibliotecaDbContext dbContext) : IReturnRepository
 {
+    public async Task<List<Return>> ListAsync(CancellationToken ct) =>
+        await dbContext.Returns
+            .AsNoTracking()
+            .Include(r => r.Fine)
+            .OrderByDescending(r => r.ReturnedAt)
+            .ToListAsync(ct);
+
     public async Task<Return?> GetByIdAsync(Guid id, CancellationToken ct) =>
         await dbContext.Returns
             .AsNoTracking()

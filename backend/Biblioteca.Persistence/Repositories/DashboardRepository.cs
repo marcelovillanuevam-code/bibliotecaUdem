@@ -38,10 +38,26 @@ public sealed class DashboardRepository(IDbContextFactory<BibliotecaDbContext> d
             .ToListAsync(ct);
 
         var byStatus = counts.ToDictionary(c => c.Status, c => c.Total, StringComparer.OrdinalIgnoreCase);
+        var total = counts.Sum(c => c.Total);
+
+        // Count non-deleted copies that actually have an active/overdue loan.
+        // This is source-of-truth for "in use" and is robust against Status/loan sync gaps
+        // (e.g. a copy stuck as LOANED after its return was processed).
+        var copiesOnActiveLoan = await db.BookCopies
+            .AsNoTracking()
+            .Where(bc => db.Loans.Any(l => l.BookCopyId == bc.Id &&
+                                           (l.Status == LoanStatus.ACTIVE || l.Status == LoanStatus.OVERDUE)))
+            .CountAsync(ct);
+
+        // Copies in permanently non-lendable states (unrelated to current loans)
+        var notLendable = byStatus.GetValueOrDefault(BookCopyStatus.Maintenance)
+            + byStatus.GetValueOrDefault(BookCopyStatus.Lost)
+            + byStatus.GetValueOrDefault(BookCopyStatus.Retired)
+            + byStatus.GetValueOrDefault(BookCopyStatus.Reserved);
 
         return new CopiesKpisDto(
-            counts.Sum(c => c.Total),
-            byStatus.GetValueOrDefault(BookCopyStatus.Available),
+            total,
+            Math.Max(0, total - copiesOnActiveLoan - notLendable),
             byStatus.GetValueOrDefault(BookCopyStatus.Loaned),
             byStatus.GetValueOrDefault(BookCopyStatus.Maintenance));
     }

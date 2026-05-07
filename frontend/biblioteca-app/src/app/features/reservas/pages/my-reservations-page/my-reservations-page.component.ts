@@ -1,10 +1,10 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { AuthSessionService } from '../../../../core/services/auth-session.service';
 import { ReservationsApiService } from '../../../../core/services/reservations-api.service';
 import { Reservation, ReservationStatus } from '../../../../shared/models/reservation.model';
+import { resolveHttpError } from '../../../../shared/utils/http-error';
 import { AccentTone } from '../../../../shared/models/user.model';
 import { PrimaryButtonComponent } from '../../../../shared/ui/primary-button/primary-button.component';
 import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
@@ -78,7 +78,7 @@ export class MyReservationsPageComponent {
         },
         error: (error: unknown) => {
           this.cancellingReservationId.set(null);
-          this.showToast(this.resolveErrorMessage(error, 'No fue posible cancelar la reserva.'), 'error');
+          this.showToast(resolveHttpError(error, 'No fue posible cancelar la reserva.'), 'error');
         }
       });
   }
@@ -167,7 +167,7 @@ export class MyReservationsPageComponent {
           this.loading.set(false);
         },
         error: (error: unknown) => {
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar tus reservas.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible cargar tus reservas.'));
           this.loading.set(false);
         }
       });
@@ -205,13 +205,5 @@ export class MyReservationsPageComponent {
     this.toast.set({ message, tone });
   }
 
-  private resolveErrorMessage(error: unknown, fallbackMessage: string): string {
-    if (error instanceof HttpErrorResponse) {
-      const detail = error.error?.detail as string | undefined;
-      const title = error.error?.title as string | undefined;
-      return detail || title || fallbackMessage;
-    }
-
-    return fallbackMessage;
-  }
 }
+

@@ -42,12 +42,15 @@ public sealed class LoanRepository(BibliotecaDbContext dbContext) : ILoanReposit
         return await query.OrderByDescending(l => l.LoanedAt).ToListAsync(ct);
     }
 
-    public async Task<IReadOnlyCollection<Loan>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct)
+    public async Task<IReadOnlyCollection<Loan>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct, string? copyBarcode = null)
     {
         var query = WithFullIncludes(dbContext.Loans.AsNoTracking());
 
         if (statusFilter.HasValue)
             query = query.Where(l => l.Status == statusFilter.Value);
+
+        if (copyBarcode is not null)
+            query = query.Where(l => l.BookCopy!.Barcode == copyBarcode);
 
         return await query.OrderByDescending(l => l.LoanedAt).ToListAsync(ct);
     }
@@ -61,7 +64,8 @@ public sealed class LoanRepository(BibliotecaDbContext dbContext) : ILoanReposit
 
     public async Task UpdateAsync(Loan loan, CancellationToken ct)
     {
-        dbContext.Loans.Update(loan);
+        if (dbContext.Entry(loan).State == Microsoft.EntityFrameworkCore.EntityState.Detached)
+            dbContext.Loans.Update(loan);
         await dbContext.SaveChangesAsync(ct);
     }
 
