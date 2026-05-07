@@ -5,5 +5,6 @@
     <Project Path="backend/Biblioteca.Domain/Biblioteca.Domain.csproj" />
     <Project Path="backend/Biblioteca.Infrastructure/Biblioteca.Infrastructure.csproj" />
     <Project Path="backend/Biblioteca.Persistence/Biblioteca.Persistence.csproj" />
+    <Project Path="backend/Biblioteca.Tests/Biblioteca.Tests.csproj" />
   </Folder>
 </Solution>
