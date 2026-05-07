@@ -23,6 +23,7 @@ public sealed class UpdateLibroRequest
     [StringLength(100)]
     public string? Edition { get; init; }
 
+    [Required]
     [StringLength(50)]
     public string Language { get; init; } = "es";
 

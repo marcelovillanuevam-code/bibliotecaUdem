@@ -32,7 +32,9 @@ public sealed class GlobalExceptionMiddleware(
             await context.Response.WriteAsJsonAsync(new ProblemDetails
             {
                 Title = title,
-                Detail = exception.Message,
+                Detail = statusCode == StatusCodes.Status500InternalServerError
+                    ? "Se produjo un error inesperado."
+                    : exception.Message,
                 Status = statusCode,
                 Instance = context.Request.Path
             });

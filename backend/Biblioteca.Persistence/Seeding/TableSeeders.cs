@@ -400,19 +400,19 @@ internal sealed class BooksSeeder : IDatabaseSeeder
             new Libro { Id = SeedData.PrideBookId, Title = "Pride and Prejudice", Subtitle = "A Novel", Isbn = "9780141199078", Publisher = "T. Egerton", PublicationYear = 1813, Edition = "1", Language = "en", SummaryJson = "{\"short\":\"Novela sobre costumbres y matrimonio\"}", MetadataJson = "{\"format\":\"tapa blanda\"}", CreatedAt = SeedData.CatalogSeedTimestamp, UpdatedAt = SeedData.CatalogSeedTimestamp }
         };
 
-        // TODO (Lote 7 / BUG-08): FindAsync respeta HasQueryFilter; si un libro seed fue
-        // soft-deleted, aquí da null y luego SaveChangesAsync falla con violación de PK.
-        // Fix: reemplazar FindAsync por IgnoreQueryFilters().FirstOrDefaultAsync() y
-        // restaurar DeletedAt = null para datos de seed.
         foreach (var entry in entries)
         {
-            var existing = await dbContext.Books.FindAsync([entry.Id], cancellationToken);
+            var existing = await dbContext.Books
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(book => book.Id == entry.Id, cancellationToken);
+
             if (existing is null)
             {
                 dbContext.Books.Add(entry);
                 continue;
             }
 
+            existing.DeletedAt = null;
             existing.Title = entry.Title;
             existing.Subtitle = entry.Subtitle;
             existing.Isbn = entry.Isbn;

@@ -198,4 +198,11 @@ public sealed class UsuarioRepository(BibliotecaDbContext dbContext) : IUsuarioR
     {
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task SaveChangesInTransactionAsync(CancellationToken cancellationToken)
+    {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+    }
 }

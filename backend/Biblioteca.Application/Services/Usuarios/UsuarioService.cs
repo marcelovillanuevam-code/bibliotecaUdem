@@ -37,8 +37,6 @@ public sealed class UsuarioService(
 
     public async Task<UsuarioDto> CreateAsync(CreateUsuarioRequest request, CancellationToken cancellationToken)
     {
-        await usuarioRepository.EnsureReferenceDataAsync(cancellationToken);
-
         var username = request.Username.Trim();
         var email = request.Email.Trim().ToLowerInvariant();
         var statusCode = NormalizeStatusCode(request.StatusCode);
@@ -127,8 +125,6 @@ public sealed class UsuarioService(
 
     public async Task<UsuarioDto> UpdateAsync(Guid id, UpdateUsuarioRequest request, CancellationToken cancellationToken)
     {
-        await usuarioRepository.EnsureReferenceDataAsync(cancellationToken);
-
         var usuario = await usuarioRepository.GetByIdForUpdateAsync(id, cancellationToken)
             ?? throw new NotFoundException("No se encontro el usuario solicitado.");
 
@@ -224,7 +220,7 @@ public sealed class UsuarioService(
             assignedRole.AssignedAt = now;
         }
 
-        await usuarioRepository.SaveChangesAsync(cancellationToken);
+        await usuarioRepository.SaveChangesInTransactionAsync(cancellationToken);
 
         var updatedUser = await usuarioRepository.GetByIdAsync(id, cancellationToken)
             ?? throw new InvalidOperationException("No se pudo recuperar el usuario actualizado.");

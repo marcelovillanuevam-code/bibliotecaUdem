@@ -1,12 +1,18 @@
+using Biblioteca.API.Services;
+using Biblioteca.Application.Interfaces.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi;
 
 namespace Biblioteca.API.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApiConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddApiConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+
         services.AddProblemDetails();
         services.AddControllers();
         services.AddEndpointsApiExplorer();
@@ -49,14 +55,17 @@ public static class ServiceCollectionExtensions
                 policy => policy.RequireAuthenticatedUser());
         });
 
+        var corsOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
         services.AddCors(options =>
         {
             options.AddPolicy("Frontend", policy =>
             {
-                policy
-                    .WithOrigins("http://localhost:4200")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
+                var origins = corsOrigins.Length > 0
+                    ? corsOrigins
+                    : ["http://localhost:4200"];
+
+                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
             });
         });
 

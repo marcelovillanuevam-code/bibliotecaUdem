@@ -37,6 +37,7 @@ services:
       Jwt__Audience: BibliotecaUdem.Client
       Jwt__ExpiresInMinutes: 60
       Auth__AllowedEmailDomain: udem.edu
+      Cors__AllowedOrigins__0: http://localhost:4200
     depends_on:
       postgres:
         condition: service_healthy

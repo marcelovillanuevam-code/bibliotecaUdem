@@ -22,4 +22,5 @@ public interface IUsuarioRepository
         CancellationToken cancellationToken);
     Task UpdateAuthAsync(AutenticacionUsuario auth, CancellationToken cancellationToken);
     Task SaveChangesAsync(CancellationToken cancellationToken);
+    Task SaveChangesInTransactionAsync(CancellationToken cancellationToken);
 }

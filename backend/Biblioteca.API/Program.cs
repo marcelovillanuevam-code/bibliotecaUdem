@@ -23,8 +23,17 @@ if (string.IsNullOrWhiteSpace(jwtSecretKey) || jwtSecretKey.Length < 32)
         "Configurar via user secrets o variable de entorno Jwt__SecretKey.");
 }
 
+// Falla el arranque en producción si no se configura al menos un origen CORS.
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+if (corsOrigins.Length == 0 && builder.Environment.IsProduction())
+{
+    throw new InvalidOperationException(
+        "Cors:AllowedOrigins no configurado para produccion. " +
+        "Configurar via variable de entorno Cors__AllowedOrigins__0.");
+}
+
 builder.Services
-    .AddApiConfiguration()
+    .AddApiConfiguration(builder.Configuration)
     .AddApplication(builder.Configuration)
     .AddInfrastructure(builder.Configuration)
     .AddPersistence(builder.Configuration);
