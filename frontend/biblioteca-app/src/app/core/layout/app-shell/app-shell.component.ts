@@ -1,10 +1,12 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthSessionService } from '../../services/auth-session.service';
 import { MockLibraryDataService } from '../../services/mock-library-data.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { SupportFabComponent } from '../../../shared/ui/support-fab/support-fab.component';
+
+const MANAGE_ROUTES = new Set(['/dashboard/libros', '/usuarios']);
 
 @Component({
   selector: 'app-shell',
@@ -19,6 +21,14 @@ export class AppShellComponent {
   protected readonly libraryData = inject(MockLibraryDataService);
   protected readonly currentUser = this.authSession.currentUser;
   protected readonly sidebarOpen = signal(false);
+
+  protected readonly navItems = computed(() => {
+    const role = this.currentUser().role;
+    const canManage = role === 'Administrador' || role === 'Bibliotecario';
+    return canManage
+      ? this.libraryData.navItems
+      : this.libraryData.navItems.filter(item => !MANAGE_ROUTES.has(item.route));
+  });
 
   constructor() {
     if (typeof window !== 'undefined') {

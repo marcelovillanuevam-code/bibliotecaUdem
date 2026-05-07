@@ -1,6 +1,6 @@
 <div class="shell">
   <app-sidebar
-    [items]="libraryData.navItems"
+    [items]="navItems()"
     [currentUser]="currentUser()"
     [open]="sidebarOpen()"
     (closeRequest)="closeSidebar()"

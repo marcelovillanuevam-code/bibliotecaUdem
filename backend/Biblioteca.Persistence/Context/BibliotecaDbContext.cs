@@ -117,6 +117,7 @@ public sealed class BibliotecaDbContext(
             Usuario u => ("users", u.Id),
             Libro l => ("books", l.Id),
             BookCopy bc => ("book_copies", bc.Id),
+            // TODO Lote MX-2 (Marcelo): agregar Loan => ("loans", ...) y LoanRenewal => ("loan_renewals", ...) cuando existan las entidades
             _ => (null, null)
         };
 }
