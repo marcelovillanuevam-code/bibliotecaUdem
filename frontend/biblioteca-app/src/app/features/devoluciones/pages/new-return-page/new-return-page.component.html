@@ -1,0 +1,200 @@
+<section class="new-return-page">
+  <header class="new-return-page__header">
+    <h2>Nueva Devolución</h2>
+    <p>Registra la devolución de un ejemplar prestado</p>
+  </header>
+
+  <!-- Paso 1: Buscar préstamo activo -->
+  @if (step() === 'search') {
+    <div class="return-step">
+      <div class="return-step__title">
+        <span class="return-step__num">1</span>
+        <h3>Buscar préstamo activo</h3>
+      </div>
+
+      <div class="return-search__modes">
+        <button
+          type="button"
+          class="return-search__mode"
+          [class.return-search__mode--active]="searchMode() === 'barcode'"
+          (click)="setSearchMode('barcode')"
+        >
+          Por código de barras
+        </button>
+        <button
+          type="button"
+          class="return-search__mode"
+          [class.return-search__mode--active]="searchMode() === 'userId'"
+          (click)="setSearchMode('userId')"
+        >
+          Por usuario
+        </button>
+      </div>
+
+      <form class="return-search__form" (ngSubmit)="onSearch()">
+        <input
+          class="return-search__input"
+          type="text"
+          [(ngModel)]="searchQuery"
+          name="searchQuery"
+          [placeholder]="searchPlaceholder"
+          [attr.aria-label]="searchPlaceholder"
+          autocomplete="off"
+        />
+        <button type="submit" class="return-search__btn" [disabled]="searchLoading()">
+          {{ searchLoading() ? 'Buscando...' : 'Buscar' }}
+        </button>
+      </form>
+
+      @if (searchError()) {
+        <p class="return-search__error" role="alert">{{ searchError() }}</p>
+      }
+
+      @if (loanResults().length > 0) {
+        <div class="loan-results">
+          <p class="loan-results__label">
+            {{ loanResults().length }} préstamo(s) encontrado(s). Selecciona uno:
+          </p>
+          @for (loan of loanResults(); track loan.id) {
+            <button type="button" class="loan-card" (click)="selectLoan(loan)">
+              <div class="loan-card__main">
+                <strong>{{ loan.bookTitle }}</strong>
+                <span>Copia: <code>{{ loan.copyBarcode }}</code></span>
+              </div>
+              <div class="loan-card__meta">
+                <span>{{ loan.borrowerName }}</span>
+                <span>Vence: {{ formatDate(loan.dueAt) }}</span>
+              </div>
+              <svg class="loan-card__arrow" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Paso 2: Formulario de devolución -->
+  @if (step() === 'form') {
+    <div class="return-step">
+      <div class="return-step__title">
+        <span class="return-step__num">2</span>
+        <h3>Registrar condición de devolución</h3>
+      </div>
+
+      @let loan = selectedLoan();
+      @if (loan) {
+        <dl class="loan-summary">
+          <div class="loan-summary__row">
+            <dt>Libro</dt>
+            <dd>{{ loan.bookTitle }}</dd>
+          </div>
+          <div class="loan-summary__row">
+            <dt>Copia</dt>
+            <dd><code>{{ loan.copyBarcode }}</code></dd>
+          </div>
+          <div class="loan-summary__row">
+            <dt>Usuario</dt>
+            <dd>{{ loan.borrowerName }} — {{ loan.borrowerEmail }}</dd>
+          </div>
+          <div class="loan-summary__row">
+            <dt>Fecha vencimiento</dt>
+            <dd>{{ formatDate(loan.dueAt) }}</dd>
+          </div>
+        </dl>
+      }
+
+      <form class="return-form" (ngSubmit)="onSubmit()">
+        <fieldset class="return-form__fieldset">
+          <legend>Condición del ejemplar</legend>
+          <label class="return-form__radio">
+            <input type="radio" name="condition" value="OK" [(ngModel)]="condition" />
+            <div>
+              <span>Bien (OK)</span>
+              <small>El ejemplar regresa en buen estado</small>
+            </div>
+          </label>
+          <label class="return-form__radio">
+            <input type="radio" name="condition" value="DAMAGED" [(ngModel)]="condition" />
+            <div>
+              <span>Dañado</span>
+              <small>El ejemplar presenta daños visibles</small>
+            </div>
+          </label>
+          <label class="return-form__radio">
+            <input type="radio" name="condition" value="LOST" [(ngModel)]="condition" />
+            <div>
+              <span>Perdido</span>
+              <small>El ejemplar no fue devuelto físicamente</small>
+            </div>
+          </label>
+        </fieldset>
+
+        <label class="return-form__label">
+          <span>Notas de inspección (opcional)</span>
+          <textarea
+            class="return-form__notes"
+            name="inspectionNotes"
+            [(ngModel)]="inspectionNotes"
+            placeholder="Describe el estado del ejemplar o agrega observaciones..."
+            rows="3"
+          ></textarea>
+        </label>
+
+        @if (submitError()) {
+          <div class="return-form__error" role="alert">{{ submitError() }}</div>
+        }
+
+        <div class="return-form__actions">
+          <button type="button" class="return-form__back" (click)="backToSearch()">
+            ← Volver a buscar
+          </button>
+          <app-primary-button type="submit" [disabled]="submitLoading()">
+            {{ submitLoading() ? 'Registrando...' : 'Registrar devolución' }}
+          </app-primary-button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Paso 3: Resultado -->
+  @if (step() === 'result') {
+    @let result = returnResult();
+    @if (result) {
+      <div class="return-step">
+        <div class="return-result">
+          <div class="return-result__icon" aria-hidden="true">✓</div>
+          <h3>Devolución registrada</h3>
+          <p>El préstamo fue cerrado correctamente.</p>
+        </div>
+
+        @if (result.finesGenerated.length > 0) {
+          <div class="return-fines">
+            <h4>Multas generadas ({{ result.finesGenerated.length }})</h4>
+            @for (fine of result.finesGenerated; track fine.id) {
+              <div class="return-fine-item">
+                <span>{{ reasonLabel(fine.reason) }}</span>
+                <strong>{{ formatAmount(fine.amount) }}</strong>
+              </div>
+            }
+            <p class="return-fines__note">Las multas quedaron registradas como Pendientes.</p>
+          </div>
+        } @else {
+          <div class="return-fines return-fines--clean">
+            <p>No se generaron multas en esta devolución.</p>
+          </div>
+        }
+
+        <div class="return-result__actions">
+          <button type="button" class="return-form__back" (click)="registerAnother()">
+            Registrar otra devolución
+          </button>
+          <app-primary-button (click)="goToFines()">
+            Ver multas
+          </app-primary-button>
+        </div>
+      </div>
+    }
+  }
+</section>

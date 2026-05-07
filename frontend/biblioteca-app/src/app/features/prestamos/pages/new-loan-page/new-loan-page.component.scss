@@ -1,0 +1,30 @@
+.new-loan-page { display: grid; gap: 1.25rem; animation: page-enter 280ms ease; }
+.new-loan-page__hero, .new-loan-form__panel, .loan-toast { border: 1px solid var(--line-soft); border-radius: 1.8rem; background: rgba(255, 255, 255, 0.96); }
+.new-loan-page__hero { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 1.4rem; background: radial-gradient(circle at top left, rgba(49, 88, 184, 0.08), transparent 26%), rgba(255, 255, 255, 0.96); }
+.new-loan-page__eyebrow { margin: 0 0 0.45rem; color: var(--brand-600); font-size: 0.82rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.new-loan-page__hero h2, .new-loan-page__hero p, .new-loan-form__head h3, .new-loan-form__head p { margin: 0; }
+.new-loan-page__hero h2 { color: var(--slate-950); font-size: clamp(2rem, 1.55rem + 1vw, 2.6rem); }
+.new-loan-page__hero p, .new-loan-form__head p { color: var(--slate-500); }
+.loan-toast { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.2rem; }
+.loan-toast--success { color: #1f6a4f; background: rgba(46, 143, 101, 0.1); }
+.loan-toast--error { color: #a23a3f; background: rgba(214, 63, 69, 0.08); }
+.loan-toast button { border: 0; background: transparent; color: inherit; font: inherit; font-weight: 800; cursor: pointer; }
+.new-loan-form { display: grid; gap: 1rem; }
+.new-loan-form__panel { display: grid; gap: 1.1rem; padding: 1.25rem; }
+.new-loan-form__head { display: flex; align-items: center; gap: 0.9rem; }
+.new-loan-form__head > span { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 0.9rem; background: #edf2ff; color: var(--brand-700); font-weight: 900; }
+.new-loan-form__head h3 { color: var(--slate-950); font-size: 1.25rem; }
+.new-loan-form__field { position: relative; display: grid; gap: 0.45rem; }
+.new-loan-form__field > span { color: var(--slate-700); font-size: 0.92rem; font-weight: 800; }
+.new-loan-form__field input, .new-loan-form__field select { width: 100%; min-height: 3.15rem; padding: 0.9rem 1rem; border: 1px solid var(--line-soft); border-radius: 1rem; background: white; color: var(--slate-900); font: inherit; }
+.new-loan-form__field input:focus, .new-loan-form__field select:focus { outline: none; border-color: var(--brand-300); box-shadow: var(--focus-ring); }
+.new-loan-form__field select:disabled { color: var(--slate-400); background: var(--surface-subtle); cursor: not-allowed; }
+.new-loan-form__field small { color: var(--slate-500); font-size: 0.84rem; font-weight: 700; }
+.new-loan-form__field small:first-of-type:last-child { color: var(--slate-500); }
+.autocomplete__menu { position: absolute; inset: calc(100% + 0.35rem) 0 auto 0; z-index: 15; display: grid; gap: 0.35rem; max-height: 18rem; overflow: auto; padding: 0.45rem; border: 1px solid var(--line-soft); border-radius: 1.2rem; background: rgba(255, 255, 255, 0.98); box-shadow: 0 1.25rem 3rem rgba(15, 23, 42, 0.16); }
+.autocomplete__menu button { display: grid; gap: 0.2rem; width: 100%; padding: 0.75rem 0.85rem; border: 0; border-radius: 0.9rem; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.autocomplete__menu button:hover { background: var(--surface-subtle); }
+.autocomplete__menu strong { color: var(--slate-950); }
+.autocomplete__menu span { color: var(--slate-500); font-size: 0.88rem; }
+.new-loan-form__actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
+@media (max-width: 56rem) { .new-loan-page__hero, .new-loan-form__actions { flex-direction: column; align-items: stretch; } .new-loan-form__head { align-items: flex-start; } }

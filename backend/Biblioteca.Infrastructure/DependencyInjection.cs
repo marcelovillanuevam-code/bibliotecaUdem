@@ -1,4 +1,5 @@
 using System.Text;
+using Biblioteca.Application.Common.Events;
 using Biblioteca.Application.Interfaces.Auth;
 using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Domain.Entities;
@@ -46,6 +47,10 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+
+        services.AddHostedService<OverdueLoansBackgroundService>();
+        services.AddHostedService<ReservationExpirationBackgroundService>();
 
         return services;
     }

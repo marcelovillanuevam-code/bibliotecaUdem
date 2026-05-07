@@ -1,0 +1,60 @@
+<section class="returns-page">
+  <header class="returns-page__header">
+    <div>
+      <h2>Devoluciones</h2>
+      <p>{{ returns().length }} devolución(es) registrada(s)</p>
+    </div>
+    <app-primary-button (click)="navigateToNew()">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+      <span>Nueva devolución</span>
+    </app-primary-button>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="returns-page__feedback returns-page__feedback--error" role="alert">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="returns-page__state">Cargando devoluciones...</div>
+  } @else if (returns().length === 0 && !errorMessage()) {
+    <div class="returns-page__state">
+      <p>No hay devoluciones registradas aún.</p>
+      <app-primary-button (click)="navigateToNew()">Registrar primera devolución</app-primary-button>
+    </div>
+  } @else if (returns().length > 0) {
+    <div class="returns-page__table-wrap">
+      <table class="returns-table">
+        <thead>
+          <tr>
+            <th>Libro</th>
+            <th>Copia</th>
+            <th>Usuario</th>
+            <th>Fecha devolución</th>
+            <th>Condición</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of returns(); track r.id) {
+            <tr>
+              <td>{{ r.bookTitle ?? '—' }}</td>
+              <td><code>{{ r.copyBarcode ?? '—' }}</code></td>
+              <td>{{ r.borrowerName ?? '—' }}</td>
+              <td>{{ formatDate(r.returnedAt) }}</td>
+              <td>
+                <app-status-badge
+                  [label]="conditionLabel(r.condition)"
+                  [tone]="conditionTone(r.condition)"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

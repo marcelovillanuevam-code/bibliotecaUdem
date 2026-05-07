@@ -1,0 +1,215 @@
+<section class="fine-detail-page">
+  <header class="fine-detail-page__header">
+    <button type="button" class="fine-detail-page__back" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      Volver a multas
+    </button>
+    <h2>Detalle de multa</h2>
+  </header>
+
+  @if (loading()) {
+    <div class="fine-detail-page__state">Cargando multa...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="fine-detail-page__feedback fine-detail-page__feedback--error" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @let f = fine();
+  @if (f && !loading()) {
+    <div class="fine-detail">
+      <div class="fine-detail__top">
+        <div>
+          <p class="fine-detail__eyebrow">
+            Multa #{{ f.id.substring(0, 8).toUpperCase() }}
+          </p>
+          <app-status-badge
+            [label]="statusLabel(f.status)"
+            [tone]="statusTone(f.status)"
+            [dot]="f.status === 'PENDING'"
+          />
+        </div>
+        <div class="fine-detail__amount">{{ formatAmount(f.amount) }}</div>
+      </div>
+
+      <dl class="fine-detail__grid">
+        <div>
+          <dt>Motivo</dt>
+          <dd>{{ reasonLabel(f.reason) }}</dd>
+        </div>
+        @if (f.daysLate !== null) {
+          <div>
+            <dt>Días de retraso</dt>
+            <dd>{{ f.daysLate }} día(s)</dd>
+          </div>
+        }
+        <div>
+          <dt>Usuario</dt>
+          <dd>{{ f.borrowerName ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>Correo</dt>
+          <dd>{{ f.borrowerEmail ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>Libro</dt>
+          <dd>{{ f.bookTitle ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt>Creada</dt>
+          <dd>{{ formatDate(f.createdAt) }}</dd>
+        </div>
+        @if (f.paidAt) {
+          <div>
+            <dt>Fecha de pago</dt>
+            <dd>{{ formatDate(f.paidAt) }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (f.status === 'PENDING' && canConfirmPayment()) {
+        <div class="fine-detail__actions">
+          <app-primary-button (click)="openPaymentModal()">
+            Confirmar pago
+          </app-primary-button>
+
+          @if (isAdmin()) {
+            <app-primary-button variant="secondary" (click)="openWaiveModal()">
+              Condonar multa
+            </app-primary-button>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>
+
+<!-- Modal: Confirmar pago -->
+@if (paymentModalOpen()) {
+  <div class="modal-backdrop" (click)="closePaymentModal()">
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="payment-modal-title"
+    >
+      <div class="modal__head">
+        <h3 id="payment-modal-title">Confirmar pago</h3>
+        <button
+          type="button"
+          class="modal__close"
+          (click)="closePaymentModal()"
+          aria-label="Cerrar"
+        >
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      @if (actionError()) {
+        <div class="modal__error" role="alert">{{ actionError() }}</div>
+      }
+
+      <form [formGroup]="paymentForm" (ngSubmit)="submitPayment()" class="modal__form">
+        <label class="modal__field">
+          <span>Método de pago</span>
+          <select formControlName="method" class="modal__select">
+            @for (m of paymentMethods; track m.value) {
+              <option [value]="m.value">{{ m.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="modal__field">
+          <span>Referencia (opcional)</span>
+          <input
+            type="text"
+            formControlName="reference"
+            class="modal__input"
+            placeholder="Número de recibo, folio, etc."
+          />
+        </label>
+
+        <div class="modal__actions">
+          <button
+            type="button"
+            class="modal__cancel"
+            (click)="closePaymentModal()"
+            [disabled]="actionLoading()"
+          >
+            Cancelar
+          </button>
+          <app-primary-button type="submit" [disabled]="actionLoading()">
+            {{ actionLoading() ? 'Procesando...' : 'Confirmar pago' }}
+          </app-primary-button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Condonar multa -->
+@if (waiveModalOpen()) {
+  <div class="modal-backdrop" (click)="closeWaiveModal()">
+    <div
+      class="modal"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="waive-modal-title"
+    >
+      <div class="modal__head">
+        <h3 id="waive-modal-title">Condonar multa</h3>
+        <button
+          type="button"
+          class="modal__close"
+          (click)="closeWaiveModal()"
+          aria-label="Cerrar"
+        >
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      @if (actionError()) {
+        <div class="modal__error" role="alert">{{ actionError() }}</div>
+      }
+
+      <form [formGroup]="waiveForm" (ngSubmit)="submitWaive()" class="modal__form">
+        <label class="modal__field">
+          <span>Motivo de condonación</span>
+          <textarea
+            formControlName="reason"
+            class="modal__textarea"
+            placeholder="Explica el motivo administrativo para condonar esta multa..."
+            rows="4"
+          ></textarea>
+          @if (waiveForm.controls.reason.invalid && waiveForm.controls.reason.touched) {
+            <span class="modal__field-error">El motivo es obligatorio (mínimo 5 caracteres).</span>
+          }
+        </label>
+
+        <div class="modal__actions">
+          <button
+            type="button"
+            class="modal__cancel"
+            (click)="closeWaiveModal()"
+            [disabled]="actionLoading()"
+          >
+            Cancelar
+          </button>
+          <app-primary-button type="submit" [disabled]="actionLoading()">
+            {{ actionLoading() ? 'Procesando...' : 'Condonar multa' }}
+          </app-primary-button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,6 +1,6 @@
 <div class="shell">
   <app-sidebar
-    [items]="libraryData.navItems"
+    [items]="navItems()"
     [currentUser]="currentUser()"
     [open]="sidebarOpen()"
     (closeRequest)="closeSidebar()"
@@ -15,6 +15,7 @@
     <app-topbar
       [title]="pageTitle"
       [user]="currentUser()"
+      [pendingFinesCount]="pendingFinesCount()"
       (menuToggle)="toggleSidebar()"
     />
 
@@ -23,5 +24,5 @@
     </main>
   </div>
 
-  <app-support-fab />
+  <app-chatbot-widget />
 </div>

@@ -1,0 +1,210 @@
+.reports-page {
+  display: grid;
+  gap: 1.25rem;
+  animation: page-enter 280ms ease;
+}
+
+.reports-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.reports-page__header h2 {
+  margin: 0;
+  color: var(--slate-950);
+  font-size: clamp(2rem, 1.5rem + 1vw, 2.6rem);
+  letter-spacing: -0.05em;
+}
+
+.reports-page__header p {
+  margin: 0.35rem 0 0;
+  color: var(--slate-400);
+}
+
+.reports-page__export-btn {
+  padding: 0.55rem 1.2rem;
+  border-radius: 2rem;
+  border: 1px solid var(--line-soft);
+  background: var(--surface-elevated);
+  color: var(--slate-700);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 120ms;
+  white-space: nowrap;
+}
+
+.reports-page__export-btn:hover {
+  background: var(--surface-subtle);
+}
+
+// Tabs
+.reports-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 2px solid var(--line-soft);
+  overflow-x: auto;
+}
+
+.reports-tabs__item {
+  padding: 0.6rem 1.1rem;
+  border: none;
+  background: transparent;
+  color: var(--slate-500);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 120ms, border-color 120ms;
+  white-space: nowrap;
+}
+
+.reports-tabs__item--active {
+  color: var(--slate-950);
+  border-bottom-color: var(--slate-950);
+}
+
+.reports-tabs__item:hover:not(.reports-tabs__item--active) {
+  color: var(--slate-700);
+}
+
+// Filtros
+.reports-page__filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.reports-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--slate-500);
+}
+
+.reports-filter__input {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.75rem;
+  background: var(--surface-elevated);
+  color: var(--slate-800);
+  font-size: 0.9rem;
+}
+
+// Feedback
+.reports-page__feedback {
+  padding: 1rem 1.2rem;
+  border-radius: 1.4rem;
+  border: 1px solid var(--line-soft);
+}
+
+.reports-page__feedback--error {
+  color: #a23a3f;
+  background: rgba(214, 63, 69, 0.08);
+}
+
+.reports-page__state {
+  padding: 3rem;
+  text-align: center;
+  color: var(--slate-400);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+}
+
+// KPIs
+.reports-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+}
+
+.reports-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  background: var(--surface-elevated);
+}
+
+.reports-kpi--amber {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.reports-kpi__label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reports-kpi__value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--slate-950);
+  letter-spacing: -0.04em;
+}
+
+// Tables
+.reports-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1rem;
+}
+
+.reports-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+}
+
+.reports-table-wrap__title {
+  margin: 0;
+  padding: 0.9rem 1.1rem 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reports-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.reports-table th,
+.reports-table td {
+  padding: 0.9rem 1.1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.reports-table th {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface-subtle);
+  white-space: nowrap;
+}
+
+.reports-table td small {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--slate-400);
+}
+
+.reports-table tbody tr:last-child td {
+  border-bottom: 0;
+}

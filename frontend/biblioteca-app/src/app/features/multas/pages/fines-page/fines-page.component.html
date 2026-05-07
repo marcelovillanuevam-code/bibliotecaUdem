@@ -1,0 +1,86 @@
+<section class="fines-page">
+  <header class="fines-page__header">
+    <div>
+      <h2>Multas</h2>
+      <p>{{ filteredFines().length }} multa(s) encontrada(s)</p>
+    </div>
+  </header>
+
+  <div class="fines-page__toolbar">
+    @if (isManager()) {
+      <app-search-input
+        class="fines-page__search"
+        placeholder="Buscar por usuario o libro..."
+        [value]="searchTerm()"
+        (valueChange)="updateSearch($event)"
+      />
+    }
+    <app-filter-select
+      ariaLabel="Filtrar por estado"
+      [options]="statusOptions"
+      [value]="statusFilter()"
+      (valueChange)="updateStatus($event)"
+    />
+  </div>
+
+  @if (errorMessage()) {
+    <div class="fines-page__feedback fines-page__feedback--error" role="alert">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="fines-page__state">Cargando multas...</div>
+  } @else if (filteredFines().length === 0 && !errorMessage()) {
+    <div class="fines-page__state">No hay multas que coincidan con los filtros.</div>
+  } @else {
+    <div class="fines-page__table-wrap">
+      <table class="fines-table">
+        <thead>
+          <tr>
+            @if (isManager()) {
+              <th>Usuario</th>
+            }
+            <th>Libro</th>
+            <th>Motivo</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fine of filteredFines(); track fine.id) {
+            <tr class="fines-table__row" (click)="viewFine(fine)">
+              @if (isManager()) {
+                <td>
+                  <div>{{ fine.borrowerName ?? '—' }}</div>
+                  @if (fine.borrowerEmail) {
+                    <small>{{ fine.borrowerEmail }}</small>
+                  }
+                </td>
+              }
+              <td>{{ fine.bookTitle ?? '—' }}</td>
+              <td>{{ reasonLabel(fine.reason) }}</td>
+              <td><strong>{{ formatAmount(fine.amount) }}</strong></td>
+              <td>
+                <app-status-badge
+                  [label]="statusLabel(fine.status)"
+                  [tone]="statusTone(fine.status)"
+                  [dot]="fine.status === 'PENDING'"
+                />
+              </td>
+              <td>{{ formatDate(fine.createdAt) }}</td>
+              <td>
+                <svg viewBox="0 0 24 24" fill="none" class="fines-table__chevron" aria-hidden="true">
+                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

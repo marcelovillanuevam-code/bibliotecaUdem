@@ -12,21 +12,36 @@ Repositorio base del proyecto Biblioteca UDEM para la clase de Metodologias de D
 
 ## Estado actual
 
-Ya estan cubiertos estos slices del backend:
+### Backend (ASP.NET Core 10 — Clean Architecture)
 
-- Registro de usuario
-- Login con autenticacion JWT
-- Alta de libro
-- Ficha bibliografica de libro
-- Gestion administrativa de usuarios
-- Migraciones automaticas al arrancar la API
-- Seeders idempotentes por tabla
+| Módulo | Endpoints clave | Estado |
+|--------|-----------------|--------|
+| Auth | `POST /api/auth/register`, `POST /api/auth/login` | ✅ completo |
+| Usuarios | `GET/POST/PUT/DELETE /api/usuarios` | ✅ completo |
+| Libros | `GET/POST /api/libros`, copias | ✅ completo |
+| Préstamos | `POST /api/prestamos`, renovaciones | ✅ completo |
+| Devoluciones | `POST /api/devoluciones` | ✅ completo |
+| Multas | `GET/POST /api/multas`, pagos, condonaciones | ✅ completo |
+| Reservas | `POST /api/reservas`, cola de espera | ✅ completo |
+| Notificaciones | eventos de dominio → notificaciones | ✅ completo |
+| Reportes | `GET /api/reportes/*` (AdminOnly) | ✅ completo |
 
-Ya esta cubierto este slice inicial del frontend:
+### Frontend (Angular 21 standalone)
 
-- Login institucional
-- Dashboard administrativo
-- Gestion de usuarios con busqueda y filtro conectada a API
+| Ruta | Descripción | Estado |
+|------|-------------|--------|
+| `/login` | Login institucional JWT | ✅ completo |
+| `/dashboard` | Panel principal con stats | ✅ completo |
+| `/usuarios` | Gestión de usuarios | ✅ completo |
+| `/dashboard/catalogo` | Búsqueda de libros | ✅ completo |
+| `/dashboard/libros` | Gestión del catálogo | ✅ completo |
+| `/dashboard/prestamos` | Registrar y ver préstamos | ✅ completo |
+| `/dashboard/devoluciones` | Devoluciones y nueva devolución | ✅ completo |
+| `/dashboard/multas` | Listado, detalle, pago y condonación | ✅ completo |
+| `/dashboard/configuracion/multas` | Configurar tarifas (Admin) | ✅ completo |
+| `/dashboard/reportes` | Reportes ejecutivos con export CSV (Admin) | ✅ completo |
+| `/dashboard/reservas` | Reservas y cola de espera | ✅ completo |
+| `/dashboard/notificaciones` | Bandeja de notificaciones in-app | ✅ completo |
 
 ## Estructura del repositorio
 
@@ -35,9 +50,10 @@ Ya esta cubierto este slice inicial del frontend:
 - `backend/Biblioteca.Domain`: entidades del dominio.
 - `backend/Biblioteca.Infrastructure`: JWT, fecha/hora y servicios transversales.
 - `backend/Biblioteca.Persistence`: EF Core, `DbContext`, configuraciones, migraciones y repositorios.
-- `frontend/biblioteca-app`: aplicacion Angular con rutas `/login`, `/dashboard` y `/usuarios`.
+- `frontend/biblioteca-app`: aplicacion Angular con todas las rutas funcionales.
 - `database`: dump legado, esquema SQL y datos semilla.
 - `docker-compose.yml`: PostgreSQL local para desarrollo.
+- `docs/`: documentacion del proyecto (ver abajo).
 
 ## Requisitos
 
@@ -319,11 +335,18 @@ La aplicacion Angular queda disponible por defecto en:
 
 - `http://localhost:4200`
 
-Rutas iniciales:
+Rutas disponibles:
 
 - `/login`
 - `/dashboard`
 - `/usuarios`
+- `/dashboard/catalogo`
+- `/dashboard/libros`
+- `/dashboard/prestamos`
+- `/dashboard/devoluciones`
+- `/dashboard/multas`
+- `/dashboard/configuracion/multas` (Admin)
+- `/dashboard/reportes` (Admin)
 
 Credenciales demo locales:
 
@@ -339,28 +362,51 @@ Usuarios adicionales sembrados para pruebas:
 
 ## Endpoints principales
 
-Auth:
+Auth: `POST /api/auth/register` · `POST /api/auth/login`
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
+Usuarios: `GET/POST/PUT/DELETE /api/usuarios`
 
-Usuarios:
+Libros: `GET/POST /api/libros`
 
-- `GET /api/usuarios`
-- `GET /api/usuarios/{id}`
-- `POST /api/usuarios`
-- `PUT /api/usuarios/{id}`
-- `DELETE /api/usuarios/{id}`
+Préstamos: `POST /api/prestamos` · `GET /api/prestamos/{id}` · `POST /api/prestamos/{id}/renovar`
 
-Libros:
+Devoluciones: `POST /api/devoluciones` · `GET /api/devoluciones/{id}`
 
-- `GET /api/libros`
-- `GET /api/libros/{id}`
-- `POST /api/libros`
+Multas: `GET /api/multas` · `GET /api/multas/{id}` · `POST /api/multas/{id}/pagos` · `POST /api/multas/{id}/condonar`
 
-Contrato actualizado en:
+Configuración de multas: `GET/PUT /api/configuracion-multas`
 
-- [docs/api_contracts.md](c:/bibliotecaUdem/docs/api_contracts.md)
+Reportes (AdminOnly):
+- `GET /api/reportes/multas-recaudadas?from=&to=`
+- `GET /api/reportes/multas-pendientes`
+- `GET /api/reportes/devoluciones-tardias?from=&to=`
+- `GET /api/reportes/condonaciones?from=&to=`
+
+Reservas: `POST /api/reservas` · `DELETE /api/reservas/{id}`
+
+Notificaciones: `GET /api/notificaciones` · `POST /api/notificaciones/{id}/leer`
+
+Chatbot: `POST /api/chat`
+
+Dashboard KPIs: `GET /api/dashboard/kpis`
+
+## Préstamos y Dashboard
+
+El módulo de préstamos controla el ciclo completo de entrega y devolución de ejemplares.
+Los límites por rol y las duraciones por defecto están en `appsettings.json` bajo la
+sección `Loans`. El dashboard muestra KPIs en tiempo real (préstamos activos, vencidos,
+multas pendientes, libros disponibles, reservas en cola).
+
+Ver [`docs/PRESTAMOS.md`](docs/PRESTAMOS.md) para el diagrama de estados de `Loan`,
+reglas de renovación y configuración detallada.
+
+Documentación completa en [`docs/`](docs/):
+- [`MODULOS.md`](docs/MODULOS.md) — resumen de los 3 módulos, propietarios y endpoints
+- [`PRESTAMOS.md`](docs/PRESTAMOS.md) — módulo Préstamos completo con diagrama de estados
+- [`DEVOLUCIONES_MULTAS.md`](docs/DEVOLUCIONES_MULTAS.md) — módulo Frank completo
+- [`DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md) — pendientes registrados
+- [`api_contracts.md`](docs/api_contracts.md) — contratos Auth/Usuarios/Libros
+- [`reglas_negocio.md`](docs/reglas_negocio.md) — reglas de negocio originales
 
 ## Flujo recomendado para desarrollo
 
