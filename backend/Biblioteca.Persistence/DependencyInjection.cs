@@ -1,4 +1,5 @@
 using Biblioteca.Application.Interfaces.Libros;
+using Biblioteca.Application.Interfaces.Loans;
 using Biblioteca.Application.Interfaces.Usuarios;
 using Biblioteca.Persistence.Context;
 using Biblioteca.Persistence.Repositories;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<ILibroRepository, LibroRepository>();
         services.AddScoped<IBookCopyRepository, BookCopyRepository>();
+        services.AddScoped<ILoanRepository, LoanRepository>();
         services.AddScoped<IDatabaseSeeder, StatusesSeeder>();
         services.AddScoped<IDatabaseSeeder, RolesSeeder>();
         services.AddScoped<IDatabaseSeeder, UsersSeeder>();
