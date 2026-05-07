@@ -11,6 +11,8 @@ public sealed class BibliotecaDbContext(
     ICurrentUserService currentUserService) : DbContext(options)
 {
     public DbSet<RegistroAuditoria> AuditLogs => Set<RegistroAuditoria>();
+    public DbSet<Loan> Loans => Set<Loan>();
+    public DbSet<LoanRenewal> LoanRenewals => Set<LoanRenewal>();
     public DbSet<Autor> Authors => Set<Autor>();
     public DbSet<LibroAutor> BookAuthors => Set<LibroAutor>();
     public DbSet<LibroMateria> BookSubjects => Set<LibroMateria>();
@@ -117,7 +119,8 @@ public sealed class BibliotecaDbContext(
             Usuario u => ("users", u.Id),
             Libro l => ("books", l.Id),
             BookCopy bc => ("book_copies", bc.Id),
-            // TODO Lote MX-2 (Marcelo): agregar Loan => ("loans", ...) y LoanRenewal => ("loan_renewals", ...) cuando existan las entidades
+            Loan loan => ("loans", loan.Id),
+            LoanRenewal lr => ("loan_renewals", lr.Id),
             _ => (null, null)
         };
 }
