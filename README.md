@@ -40,6 +40,8 @@ Repositorio base del proyecto Biblioteca UDEM para la clase de Metodologias de D
 | `/dashboard/multas` | Listado, detalle, pago y condonación | ✅ completo |
 | `/dashboard/configuracion/multas` | Configurar tarifas (Admin) | ✅ completo |
 | `/dashboard/reportes` | Reportes ejecutivos con export CSV (Admin) | ✅ completo |
+| `/dashboard/reservas` | Reservas y cola de espera | ✅ completo |
+| `/dashboard/notificaciones` | Bandeja de notificaciones in-app | ✅ completo |
 
 ## Estructura del repositorio
 
@@ -382,7 +384,25 @@ Reportes (AdminOnly):
 
 Reservas: `POST /api/reservas` · `DELETE /api/reservas/{id}`
 
+Notificaciones: `GET /api/notificaciones` · `POST /api/notificaciones/{id}/leer`
+
+Chatbot: `POST /api/chat`
+
+Dashboard KPIs: `GET /api/dashboard/kpis`
+
+## Préstamos y Dashboard
+
+El módulo de préstamos controla el ciclo completo de entrega y devolución de ejemplares.
+Los límites por rol y las duraciones por defecto están en `appsettings.json` bajo la
+sección `Loans`. El dashboard muestra KPIs en tiempo real (préstamos activos, vencidos,
+multas pendientes, libros disponibles, reservas en cola).
+
+Ver [`docs/PRESTAMOS.md`](docs/PRESTAMOS.md) para el diagrama de estados de `Loan`,
+reglas de renovación y configuración detallada.
+
 Documentación completa en [`docs/`](docs/):
+- [`MODULOS.md`](docs/MODULOS.md) — resumen de los 3 módulos, propietarios y endpoints
+- [`PRESTAMOS.md`](docs/PRESTAMOS.md) — módulo Préstamos completo con diagrama de estados
 - [`DEVOLUCIONES_MULTAS.md`](docs/DEVOLUCIONES_MULTAS.md) — módulo Frank completo
 - [`DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md) — pendientes registrados
 - [`api_contracts.md`](docs/api_contracts.md) — contratos Auth/Usuarios/Libros
