@@ -3,6 +3,7 @@ using System;
 using Biblioteca.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Biblioteca.Persistence.Migrations
 {
     [DbContext(typeof(BibliotecaDbContext))]
-    partial class BibliotecaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507010000_AddEmailLowerIndex")]
+    partial class AddEmailLowerIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -386,122 +389,6 @@ namespace Biblioteca.Persistence.Migrations
                         .HasDatabaseName("fk_bs_subject");
 
                     b.ToTable("book_subjects", (string)null);
-                });
-
-            modelBuilder.Entity("Biblioteca.Domain.Entities.Loan", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("BookCopyId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("book_copy_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
-                    b.Property<DateTime>("DueAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("due_at");
-
-                    b.Property<Guid>("IssuedByUserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("issued_by_user_id");
-
-                    b.Property<DateTime>("LoanedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("loaned_at");
-
-                    b.Property<int>("RenewalCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("renewal_count");
-
-                    b.Property<DateTime?>("ReturnedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("returned_at");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("status");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookCopyId")
-                        .IsUnique()
-                        .HasDatabaseName("uq_loans_active_copy")
-                        .HasFilter("status = 'ACTIVE'");
-
-                    b.HasIndex("IssuedByUserId");
-
-                    b.HasIndex("BookCopyId", "Status")
-                        .HasDatabaseName("idx_loans_book_copy_status");
-
-                    b.HasIndex("UserId", "Status")
-                        .HasDatabaseName("idx_loans_user_status");
-
-                    b.ToTable("loans", (string)null);
-
-                    b.HasAnnotation("Npgsql:UseXminAsConcurrencyToken", true);
-                });
-
-            modelBuilder.Entity("Biblioteca.Domain.Entities.LoanRenewal", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("LoanId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("loan_id");
-
-                    b.Property<DateTime>("NewDueAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("new_due_at");
-
-                    b.Property<DateTime>("PreviousDueAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("previous_due_at");
-
-                    b.Property<DateTime>("RenewedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("renewed_at");
-
-                    b.Property<Guid>("RenewedByUserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("renewed_by_user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LoanId")
-                        .HasDatabaseName("idx_loan_renewals_loan_id");
-
-                    b.HasIndex("RenewedByUserId");
-
-                    b.ToTable("loan_renewals", (string)null);
                 });
 
             modelBuilder.Entity("Biblioteca.Domain.Entities.Materia", b =>
@@ -1008,52 +895,6 @@ namespace Biblioteca.Persistence.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("Biblioteca.Domain.Entities.Loan", b =>
-                {
-                    b.HasOne("Biblioteca.Domain.Entities.BookCopy", "BookCopy")
-                        .WithMany()
-                        .HasForeignKey("BookCopyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Biblioteca.Domain.Entities.Usuario", "IssuedByUser")
-                        .WithMany()
-                        .HasForeignKey("IssuedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Biblioteca.Domain.Entities.Usuario", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("BookCopy");
-
-                    b.Navigation("IssuedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Biblioteca.Domain.Entities.LoanRenewal", b =>
-                {
-                    b.HasOne("Biblioteca.Domain.Entities.Loan", "Loan")
-                        .WithMany("Renewals")
-                        .HasForeignKey("LoanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Biblioteca.Domain.Entities.Usuario", "RenewedByUser")
-                        .WithMany()
-                        .HasForeignKey("RenewedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Loan");
-
-                    b.Navigation("RenewedByUser");
-                });
-
             modelBuilder.Entity("Biblioteca.Domain.Entities.PerfilUsuario", b =>
                 {
                     b.HasOne("Biblioteca.Domain.Entities.Usuario", "User")
@@ -1134,11 +975,6 @@ namespace Biblioteca.Persistence.Migrations
                     b.Navigation("Copies");
 
                     b.Navigation("Subjects");
-                });
-
-            modelBuilder.Entity("Biblioteca.Domain.Entities.Loan", b =>
-                {
-                    b.Navigation("Renewals");
                 });
 
             modelBuilder.Entity("Biblioteca.Domain.Entities.Materia", b =>

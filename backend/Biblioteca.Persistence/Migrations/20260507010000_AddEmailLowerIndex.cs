@@ -1,15 +1,13 @@
-using Biblioteca.Persistence.Context;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Biblioteca.Persistence.Migrations;
 
-[DbContext(typeof(BibliotecaDbContext))]
-[Migration("20260507010000_AddEmailLowerIndex")]
-public class AddEmailLowerIndex : Migration
+/// <inheritdoc />
+public partial class AddEmailLowerIndex : Migration
 {
+    /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.Sql(
@@ -17,6 +15,7 @@ public class AddEmailLowerIndex : Migration
             "ON user_contacts (LOWER(value)) WHERE type = 'email';");
     }
 
+    /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.Sql(

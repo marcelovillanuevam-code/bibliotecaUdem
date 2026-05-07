@@ -16,6 +16,8 @@ public sealed class BibliotecaDbContext(
     public DbSet<LibroMateria> BookSubjects => Set<LibroMateria>();
     public DbSet<BookCopy> BookCopies => Set<BookCopy>();
     public DbSet<Libro> Books => Set<Libro>();
+    public DbSet<Loan> Loans => Set<Loan>();
+    public DbSet<LoanRenewal> LoanRenewals => Set<LoanRenewal>();
     public DbSet<Ubicacion> Locations => Set<Ubicacion>();
     public DbSet<TokenRestablecimientoContrasena> PasswordResetTokens => Set<TokenRestablecimientoContrasena>();
     public DbSet<Rol> Roles => Set<Rol>();
@@ -117,6 +119,7 @@ public sealed class BibliotecaDbContext(
             Usuario u => ("users", u.Id),
             Libro l => ("books", l.Id),
             BookCopy bc => ("book_copies", bc.Id),
+            Loan loan => ("loans", loan.Id),
             _ => (null, null)
         };
 }
