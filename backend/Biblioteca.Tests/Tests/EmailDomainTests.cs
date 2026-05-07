@@ -73,6 +73,36 @@ public sealed class EmailDomainTests
             "la validación de dominio pasó y luego se alcanzó el repositorio stub");
     }
 
+    // BUG-09 + Lote 6: el dominio debe aceptarse sin importar la capitalización del input
+    [Theory]
+    [InlineData("estudiante@UDEM.EDU")]
+    [InlineData("admin@Udem.Edu")]
+    [InlineData("TEST@udem.edu")]
+    public async Task RegisterAsync_acepta_correo_con_dominio_en_cualquier_capitalizacion(string email)
+    {
+        var authOptions = Options.Create(new AuthOptions { AllowedEmailDomain = "udem.edu" });
+        var service = new AuthService(
+            new ThrowingUserRepository(),
+            null!,
+            null!,
+            null!,
+            authOptions,
+            null!);
+
+        var request = new RegisterUserRequest
+        {
+            Username = "valid",
+            Email = email,
+            Password = "Password1",
+            FirstName = "Valid",
+            LastName = "User"
+        };
+
+        var act = () => service.RegisterAsync(request, CancellationToken.None);
+        await act.Should().ThrowAsync<NotImplementedException>(
+            "la validación de dominio pasó (case-insensitive) y se alcanzó el repositorio stub");
+    }
+
     // Stub cuyo único propósito es detectar si el repositorio fue alcanzado
     private sealed class ThrowingUserRepository : IUsuarioRepository
     {
