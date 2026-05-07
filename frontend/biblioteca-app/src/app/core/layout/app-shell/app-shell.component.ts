@@ -6,14 +6,14 @@ import { FinesApiService } from '../../services/fines-api.service';
 import { MockLibraryDataService } from '../../services/mock-library-data.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
-import { SupportFabComponent } from '../../../shared/ui/support-fab/support-fab.component';
+import { ChatbotWidgetComponent } from '../../../features/chatbot/chatbot-widget/chatbot-widget.component';
 
 const LIBRARIAN_ROUTES = new Set(['/dashboard/libros', '/usuarios', '/dashboard/devoluciones']);
 const ADMIN_ROUTES = new Set(['/dashboard/configuracion/multas', '/dashboard/reportes']);
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, SidebarComponent, TopbarComponent, SupportFabComponent],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent, ChatbotWidgetComponent],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss'
 })

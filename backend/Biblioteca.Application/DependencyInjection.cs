@@ -1,6 +1,7 @@
 using Biblioteca.Application.Common.Events;
 using Biblioteca.Application.Common.Services;
 using Biblioteca.Application.Interfaces.Auth;
+using Biblioteca.Application.Interfaces.Chatbot;
 using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Dashboard;
 using Biblioteca.Application.Interfaces.Libros;
@@ -14,6 +15,7 @@ using Biblioteca.Application.Notifications.EventHandlers;
 using Biblioteca.Application.Options;
 using Biblioteca.Application.Reservations.EventHandlers;
 using Biblioteca.Application.Services.Auth;
+using Biblioteca.Application.Services.Chatbot;
 using Biblioteca.Application.Services.Common;
 using Biblioteca.Application.Services.Dashboard;
 using Biblioteca.Application.Services.Fines;
@@ -69,6 +71,9 @@ public static class DependencyInjection
         // Reservations/Notifications module
         services.AddScoped<IReservationService, ReservationService>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        // Chatbot module
+        services.AddScoped<IChatbotProvider, RuleBasedChatbotProvider>();
 
         // Domain event handlers
         services.AddScoped<IDomainEventHandler<Common.Events.LoanReturned>, LoanReturnedHandler>();
