@@ -102,10 +102,22 @@
             }
           </div>
 
+          @if (!isManageMode) {
+            <div
+              class="book-card__availability"
+              [class.book-card__availability--ok]="book.availableCopies > 0"
+              [class.book-card__availability--none]="book.availableCopies === 0"
+            >
+              <span class="book-card__availability-dot"></span>
+              <span>{{ book.availableCopies }} / {{ book.totalCopies }} disponibles</span>
+            </div>
+          }
+
           <div class="book-card__actions">
             <button type="button" (click)="openDetail(book.id)">Consultar</button>
 
             @if (isManageMode) {
+              <button type="button" (click)="openCopies(book.id)">Ejemplares</button>
               <button type="button" (click)="openEditEditor(book.id)">Editar</button>
               <button type="button" class="book-card__danger" (click)="removeBook(book)" [disabled]="isDeleting(book.id)">
                 {{ isDeleting(book.id) ? 'Bajando...' : 'Baja' }}
@@ -119,6 +131,7 @@
     }
   </section>
 
+  <!-- ——— Modal: Detalle de libro ——— -->
   @if (detailOpen()) {
     <section class="book-modal-backdrop" (click)="closeDetail()">
       <div class="book-modal book-modal--detail" (click)="$event.stopPropagation()" aria-labelledby="book-detail-title">
@@ -172,8 +185,8 @@
                 <p>{{ book.edition || 'S/E' }} · {{ book.publicationYear || 'S/A' }}</p>
               </article>
               <article>
-                <h5>Ubicacion en biblioteca</h5>
-                <p>{{ locationLabel(book) }}</p>
+                <h5>Disponibilidad</h5>
+                <p>{{ book.availableCopies }} de {{ book.totalCopies }} ejemplares disponibles</p>
               </article>
               <article>
                 <h5>Actualizado</h5>
@@ -197,6 +210,7 @@
     </section>
   }
 
+  <!-- ——— Modal: Editor de libro ——— -->
   @if (editorMode()) {
     <section class="book-modal-backdrop" (click)="closeEditor()">
       <div class="book-modal" (click)="$event.stopPropagation()" aria-labelledby="book-editor-title">
@@ -333,6 +347,139 @@
               </app-primary-button>
             </div>
           </form>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- ——— Modal: Ejemplares de libro ——— -->
+  @if (copiesOpen()) {
+    <section class="book-modal-backdrop" (click)="closeCopies()">
+      <div class="book-modal book-modal--copies" (click)="$event.stopPropagation()" aria-labelledby="copies-modal-title">
+        <div class="book-modal__head">
+          <div>
+            <p class="book-modal__eyebrow">Gestion de ejemplares</p>
+            <h3 id="copies-modal-title">{{ copiesBookTitle() }}</h3>
+          </div>
+
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            @if (!copyEditorMode()) {
+              <button class="copies-add-btn" type="button" (click)="openCopyCreate()">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width:1rem">
+                  <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Agregar
+              </button>
+            }
+            <button class="book-modal__close" type="button" aria-label="Cerrar ejemplares" (click)="closeCopies()">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario de alta/edición de ejemplar -->
+        @if (copyEditorMode()) {
+          <form class="copy-editor" [formGroup]="copyForm" (ngSubmit)="submitCopyEditor()">
+            <p class="copy-editor__title">
+              {{ copyEditorMode() === 'create' ? 'Nuevo ejemplar' : 'Editar ejemplar' }}
+            </p>
+
+            @if (copyEditorErrorMessage()) {
+              <div class="book-modal__feedback book-modal__feedback--error" role="alert">
+                {{ copyEditorErrorMessage() }}
+              </div>
+            }
+
+            <div class="copy-editor__grid">
+              @if (copyEditorMode() === 'create') {
+                <label class="book-editor__field">
+                  <span>Codigo de barras</span>
+                  <input type="text" formControlName="barcode" placeholder="BC-2026-001" />
+                  @if (hasCopyFieldError('barcode')) {
+                    <small>{{ copyFieldErrorMessage('barcode') }}</small>
+                  }
+                </label>
+              }
+
+              <label class="book-editor__field">
+                <span>Estado</span>
+                <select formControlName="status">
+                  <option value="AVAILABLE">Disponible</option>
+                  <option value="MAINTENANCE">Mantenimiento</option>
+                  <option value="LOST">Perdido</option>
+                  <option value="RETIRED">Retirado</option>
+                </select>
+              </label>
+
+              <label class="book-editor__field">
+                <span>Condicion</span>
+                <select formControlName="condition">
+                  <option value="">Sin especificar</option>
+                  <option value="NEW">Nuevo</option>
+                  <option value="GOOD">Bueno</option>
+                  <option value="WORN">Desgastado</option>
+                  <option value="DAMAGED">Danado</option>
+                </select>
+              </label>
+
+              @if (copyEditorMode() === 'create') {
+                <label class="book-editor__field">
+                  <span>Fecha de adquisicion</span>
+                  <input type="date" formControlName="acquiredAt" />
+                  @if (hasCopyFieldError('acquiredAt')) {
+                    <small>{{ copyFieldErrorMessage('acquiredAt') }}</small>
+                  }
+                </label>
+              }
+            </div>
+
+            <div class="book-editor__actions">
+              <app-primary-button variant="secondary" (click)="closeCopyEditor()">
+                <span>Cancelar</span>
+              </app-primary-button>
+              <app-primary-button type="submit" [disabled]="copyEditorSaving()">
+                <span>{{ copyEditorActionLabel() }}</span>
+              </app-primary-button>
+            </div>
+          </form>
+        } @else {
+          <!-- Lista de ejemplares -->
+          @if (copiesLoading()) {
+            <div class="book-modal__loading">Cargando ejemplares...</div>
+          } @else if (copiesErrorMessage()) {
+            <div class="book-modal__feedback book-modal__feedback--error" role="alert">
+              {{ copiesErrorMessage() }}
+              <button type="button" (click)="reloadCopies()" style="margin-left:0.5rem;font-weight:800;border:0;background:transparent;color:inherit;cursor:pointer">Reintentar</button>
+            </div>
+          } @else if (copies().length === 0) {
+            <div class="book-modal__loading">Este libro no tiene ejemplares registrados.</div>
+          } @else {
+            <div class="copies-list">
+              @for (copy of copies(); track copy.id) {
+                <div class="copy-row">
+                  <div class="copy-row__info">
+                    <span class="copy-row__barcode">{{ copy.barcode }}</span>
+                    @if (copy.locationName) {
+                      <span class="copy-row__location">{{ copy.locationName }}</span>
+                    }
+                  </div>
+                  <div class="copy-row__badges">
+                    <span class="copy-row__status copy-row__status--{{ copy.status.toLowerCase() }}">
+                      {{ copyStatusLabel(copy.status) }}
+                    </span>
+                    <span class="copy-row__condition">{{ copyConditionLabel(copy.condition) }}</span>
+                  </div>
+                  <div class="copy-row__meta">Adquirido: {{ formatDate(copy.acquiredAt) }}</div>
+                  <div class="copy-row__actions">
+                    <button type="button" (click)="openCopyEdit(copy)">Editar</button>
+                    <button type="button" class="copy-row__danger" (click)="removeCopy(copy)">Baja</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         }
       </div>
     </section>

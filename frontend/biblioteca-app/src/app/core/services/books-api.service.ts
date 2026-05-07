@@ -34,6 +34,8 @@ interface ApiBookDto {
   subjects: ApiBookSubjectDto[];
   createdAt: string;
   updatedAt: string;
+  totalCopies: number;
+  availableCopies: number;
 }
 
 interface ApiBookDetailDto extends ApiBookDto {
@@ -95,7 +97,9 @@ export class BooksApiService {
       authors: [...book.authors],
       subjects: [...book.subjects],
       createdAt: book.createdAt,
-      updatedAt: book.updatedAt
+      updatedAt: book.updatedAt,
+      totalCopies: book.totalCopies ?? 0,
+      availableCopies: book.availableCopies ?? 0
     };
   }
 

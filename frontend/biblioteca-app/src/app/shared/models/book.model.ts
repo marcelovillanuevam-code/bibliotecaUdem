@@ -23,6 +23,8 @@ export interface BookRecord {
   subjects: BookSubject[];
   createdAt: string;
   updatedAt: string;
+  totalCopies: number;
+  availableCopies: number;
 }
 
 export interface BookDetail extends BookRecord {

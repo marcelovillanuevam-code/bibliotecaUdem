@@ -10,7 +10,9 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BooksApiService } from '../../../../core/services/books-api.service';
+import { BookCopiesApiService } from '../../../../core/services/book-copies-api.service';
 import { BookDetail, BookFilters, BookRecord, BookSaveRequest } from '../../../../shared/models/book.model';
+import { BookCopy, BookCopyCondition, BookCopySaveRequest, BookCopyStatus, BookCopyUpdateRequest } from '../../../../shared/models/book-copy.model';
 import { PrimaryButtonComponent } from '../../../../shared/ui/primary-button/primary-button.component';
 import { SearchInputComponent } from '../../../../shared/ui/search-input/search-input.component';
 
@@ -28,6 +30,7 @@ type BookFormField =
   | 'subjectCodesRaw'
   | 'summaryJson'
   | 'metadataJson';
+type CopyFormField = 'barcode' | 'status' | 'condition' | 'acquiredAt';
 
 function jsonStringValidator(control: AbstractControl<string>): ValidationErrors | null {
   const value = control.value.trim();
@@ -62,6 +65,10 @@ function subjectCodesValidator(control: AbstractControl<string>): ValidationErro
   return subjects.length > 0 ? null : { invalidSubjects: true };
 }
 
+function noWhitespaceOnly(control: AbstractControl<string>): ValidationErrors | null {
+  return control.value.trim().length > 0 ? null : { whitespaceOnly: true };
+}
+
 @Component({
   selector: 'app-books-page',
   imports: [ReactiveFormsModule, PrimaryButtonComponent, SearchInputComponent],
@@ -73,6 +80,7 @@ export class BooksPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly formBuilder = inject(FormBuilder);
   private readonly booksApi = inject(BooksApiService);
+  private readonly bookCopiesApi = inject(BookCopiesApiService);
   private readonly mode = (this.route.snapshot.data['mode'] as BooksPageMode | undefined) ?? 'catalog';
 
   protected readonly isManageMode = this.mode === 'manage';
@@ -80,15 +88,21 @@ export class BooksPageComponent {
   protected readonly pageDescription = this.isManageMode
     ? 'Administra altas, cambios, bajas y consulta detallada del catalogo.'
     : 'Explora el catalogo institucional usando filtros por autor, materia, ISBN y mas.';
+
+  // — Lista principal —
   protected readonly books = signal<BookRecord[]>([]);
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal('');
   protected readonly successMessage = signal('');
   protected readonly deletingBookId = signal<string | null>(null);
+
+  // — Detalle de libro —
   protected readonly detailOpen = signal(false);
   protected readonly detailLoading = signal(false);
   protected readonly detailErrorMessage = signal('');
   protected readonly selectedBook = signal<BookDetail | null>(null);
+
+  // — Editor de libro —
   protected readonly editorMode = signal<BookEditorMode | null>(null);
   protected readonly editorLoading = signal(false);
   protected readonly editorSaving = signal(false);
@@ -101,6 +115,30 @@ export class BooksPageComponent {
 
     return this.editorMode() === 'create' ? 'Registrar libro' : 'Guardar cambios';
   });
+
+  // — Ejemplares —
+  protected readonly copiesOpen = signal(false);
+  protected readonly copiesBookId = signal<string | null>(null);
+  protected readonly copiesBookTitle = computed(() => {
+    const id = this.copiesBookId();
+    return id ? (this.books().find(b => b.id === id)?.title ?? '') : '';
+  });
+  protected readonly copiesLoading = signal(false);
+  protected readonly copies = signal<BookCopy[]>([]);
+  protected readonly copiesErrorMessage = signal('');
+
+  // — Editor de ejemplar —
+  protected readonly copyEditorMode = signal<'create' | 'edit' | null>(null);
+  protected readonly copyEditorSaving = signal(false);
+  protected readonly copyEditorErrorMessage = signal('');
+  protected readonly editingCopyId = signal<string | null>(null);
+  protected readonly copyEditorActionLabel = computed(() =>
+    this.copyEditorSaving()
+      ? (this.copyEditorMode() === 'create' ? 'Agregando...' : 'Guardando...')
+      : (this.copyEditorMode() === 'create' ? 'Agregar ejemplar' : 'Guardar cambios')
+  );
+
+  // — Formularios —
   protected readonly filterForm = this.formBuilder.nonNullable.group({
     title: [''],
     author: [''],
@@ -109,6 +147,7 @@ export class BooksPageComponent {
     publisher: [''],
     language: ['']
   });
+
   protected readonly editorForm = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(500)]],
     subtitle: ['', [Validators.maxLength(500)]],
@@ -123,9 +162,18 @@ export class BooksPageComponent {
     metadataJson: ['', [jsonStringValidator]]
   });
 
+  protected readonly copyForm = this.formBuilder.nonNullable.group({
+    barcode: ['', [Validators.required, Validators.maxLength(100), noWhitespaceOnly]],
+    status: ['AVAILABLE', [Validators.required]],
+    condition: [''],
+    acquiredAt: [new Date().toISOString().split('T')[0], [Validators.required]]
+  });
+
   constructor() {
     this.loadBooks();
   }
+
+  // ——— Libros: filtros y lista ———
 
   protected applyFilters(): void {
     this.loadBooks();
@@ -146,6 +194,8 @@ export class BooksPageComponent {
   protected reload(): void {
     this.loadBooks();
   }
+
+  // ——— Detalle de libro ———
 
   protected openDetail(bookId: string): void {
     this.detailOpen.set(true);
@@ -174,6 +224,8 @@ export class BooksPageComponent {
     this.detailErrorMessage.set('');
     this.selectedBook.set(null);
   }
+
+  // ——— Editor de libro ———
 
   protected openCreateEditor(): void {
     if (!this.isManageMode || this.editorSaving()) {
@@ -347,6 +399,165 @@ export class BooksPageComponent {
       });
   }
 
+  // ——— Ejemplares ———
+
+  protected openCopies(bookId: string): void {
+    if (!this.isManageMode) return;
+    this.copiesOpen.set(true);
+    this.copiesBookId.set(bookId);
+    this.copiesErrorMessage.set('');
+    this.closeCopyEditor();
+    this.loadCopies();
+  }
+
+  protected closeCopies(): void {
+    this.copiesOpen.set(false);
+    this.copiesBookId.set(null);
+    this.copies.set([]);
+    this.copiesErrorMessage.set('');
+    this.closeCopyEditor();
+  }
+
+  protected reloadCopies(): void {
+    this.copiesErrorMessage.set('');
+    this.loadCopies();
+  }
+
+  protected openCopyCreate(): void {
+    if (this.copyEditorSaving()) return;
+    this.copyEditorMode.set('create');
+    this.editingCopyId.set(null);
+    this.copyEditorErrorMessage.set('');
+    this.copyForm.enable();
+    this.copyForm.reset({
+      barcode: '',
+      status: 'AVAILABLE',
+      condition: '',
+      acquiredAt: new Date().toISOString().split('T')[0]
+    });
+  }
+
+  protected openCopyEdit(copy: BookCopy): void {
+    if (this.copyEditorSaving()) return;
+    this.copyEditorMode.set('edit');
+    this.editingCopyId.set(copy.id);
+    this.copyEditorErrorMessage.set('');
+    this.copyForm.enable();
+    this.copyForm.reset({
+      barcode: copy.barcode,
+      status: copy.status,
+      condition: copy.condition ?? '',
+      acquiredAt: copy.acquiredAt.split('T')[0]
+    });
+    this.copyForm.controls.barcode.disable();
+    this.copyForm.controls.acquiredAt.disable();
+  }
+
+  protected closeCopyEditor(): void {
+    if (this.copyEditorSaving()) return;
+    this.copyEditorMode.set(null);
+    this.editingCopyId.set(null);
+    this.copyEditorErrorMessage.set('');
+    this.copyForm.enable();
+    this.copyForm.reset({
+      barcode: '',
+      status: 'AVAILABLE',
+      condition: '',
+      acquiredAt: new Date().toISOString().split('T')[0]
+    });
+  }
+
+  protected submitCopyEditor(): void {
+    const mode = this.copyEditorMode();
+    const bookId = this.copiesBookId();
+    if (!mode || !bookId || this.copyEditorSaving()) return;
+
+    if (this.copyForm.invalid) {
+      this.copyForm.markAllAsTouched();
+      return;
+    }
+
+    this.copyEditorSaving.set(true);
+    this.copyEditorErrorMessage.set('');
+    const formValue = this.copyForm.getRawValue();
+
+    if (mode === 'create') {
+      const request: BookCopySaveRequest = {
+        barcode: formValue.barcode.trim(),
+        status: (formValue.status as BookCopyStatus) || 'AVAILABLE',
+        condition: formValue.condition ? (formValue.condition as BookCopyCondition) : undefined,
+        acquiredAt: formValue.acquiredAt
+      };
+
+      this.bookCopiesApi
+        .create(bookId, request)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.copyEditorSaving.set(false);
+            this.closeCopyEditor();
+            this.loadCopies();
+            this.refreshBookCounts(bookId);
+          },
+          error: (error: unknown) => {
+            this.copyEditorSaving.set(false);
+            this.copyEditorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible agregar el ejemplar.'));
+          }
+        });
+      return;
+    }
+
+    const copyId = this.editingCopyId();
+    if (!copyId) {
+      this.copyEditorSaving.set(false);
+      return;
+    }
+
+    const updateRequest: BookCopyUpdateRequest = {
+      status: formValue.status as BookCopyStatus,
+      condition: formValue.condition ? (formValue.condition as BookCopyCondition) : undefined
+    };
+
+    this.bookCopiesApi
+      .update(copyId, updateRequest)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.copyEditorSaving.set(false);
+          this.closeCopyEditor();
+          this.loadCopies();
+          this.refreshBookCounts(bookId);
+        },
+        error: (error: unknown) => {
+          this.copyEditorSaving.set(false);
+          this.copyEditorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible actualizar el ejemplar.'));
+        }
+      });
+  }
+
+  protected removeCopy(copy: BookCopy): void {
+    const bookId = this.copiesBookId();
+    if (!bookId) return;
+
+    const confirmed = window.confirm(`Se dara de baja el ejemplar con codigo "${copy.barcode}". ¿Deseas continuar?`);
+    if (!confirmed) return;
+
+    this.bookCopiesApi
+      .delete(copy.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.loadCopies();
+          this.refreshBookCounts(bookId);
+        },
+        error: (error: unknown) => {
+          this.copiesErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible dar de baja el ejemplar.'));
+        }
+      });
+  }
+
+  // ——— Helpers de UI ———
+
   protected dismissSuccessMessage(): void {
     this.successMessage.set('');
   }
@@ -383,6 +594,52 @@ export class BooksPageComponent {
     return 'Revisa este valor.';
   }
 
+  protected hasCopyFieldError(fieldName: CopyFormField): boolean {
+    const control = this.copyForm.controls[fieldName];
+    return control.invalid && (control.dirty || control.touched);
+  }
+
+  protected copyFieldErrorMessage(fieldName: CopyFormField): string {
+    const control = this.copyForm.controls[fieldName];
+
+    if (control.hasError('required')) {
+      return 'Este campo es obligatorio.';
+    }
+
+    if (control.hasError('maxlength')) {
+      const maxLength = control.getError('maxlength')?.requiredLength as number | undefined;
+      return `No puede exceder ${maxLength ?? 0} caracteres.`;
+    }
+
+    if (control.hasError('whitespaceOnly')) {
+      return 'El codigo no puede ser solo espacios en blanco.';
+    }
+
+    return 'Revisa este valor.';
+  }
+
+  protected copyStatusLabel(status: string): string {
+    switch (status) {
+      case 'AVAILABLE': return 'Disponible';
+      case 'MAINTENANCE': return 'Mantenimiento';
+      case 'LOST': return 'Perdido';
+      case 'RETIRED': return 'Retirado';
+      case 'LOANED': return 'Prestado';
+      case 'RESERVED': return 'Reservado';
+      default: return status;
+    }
+  }
+
+  protected copyConditionLabel(condition: string | null): string {
+    switch (condition) {
+      case 'NEW': return 'Nuevo';
+      case 'GOOD': return 'Bueno';
+      case 'WORN': return 'Desgastado';
+      case 'DAMAGED': return 'Danado';
+      default: return '—';
+    }
+  }
+
   protected formatAuthors(book: BookRecord | BookDetail): string {
     return book.authors.map((author) => author.fullName).join(', ');
   }
@@ -412,6 +669,14 @@ export class BooksPageComponent {
     }).format(new Date(value));
   }
 
+  protected formatDate(value: string): string {
+    return new Intl.DateTimeFormat('es-MX', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(new Date(value));
+  }
+
   protected locationLabel(book: BookDetail): string {
     const metadata = this.tryParseJson(book.metadataJson);
     if (!metadata) {
@@ -436,6 +701,8 @@ export class BooksPageComponent {
     return this.deletingBookId() === bookId;
   }
 
+  // ——— Privados ———
+
   private loadBooks(): void {
     this.loading.set(true);
     this.errorMessage.set('');
@@ -452,6 +719,38 @@ export class BooksPageComponent {
           this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar los libros desde la API.'));
           this.loading.set(false);
         }
+      });
+  }
+
+  private loadCopies(): void {
+    const bookId = this.copiesBookId();
+    if (!bookId) return;
+
+    this.copiesLoading.set(true);
+    this.copiesErrorMessage.set('');
+
+    this.bookCopiesApi
+      .listByBook(bookId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (copies) => {
+          this.copies.set(copies);
+          this.copiesLoading.set(false);
+        },
+        error: (error: unknown) => {
+          this.copiesErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar los ejemplares.'));
+          this.copiesLoading.set(false);
+        }
+      });
+  }
+
+  private refreshBookCounts(bookId: string): void {
+    this.booksApi
+      .getBook(bookId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (book) => this.upsertBook(book),
+        error: () => { /* refresh silencioso; se verá en el próximo reload de lista */ }
       });
   }
 
@@ -542,7 +841,9 @@ export class BooksPageComponent {
       authors: [...book.authors],
       subjects: [...book.subjects],
       createdAt: book.createdAt,
-      updatedAt: book.updatedAt
+      updatedAt: book.updatedAt,
+      totalCopies: book.totalCopies,
+      availableCopies: book.availableCopies
     };
 
     this.books.update((books) =>
