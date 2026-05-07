@@ -1,91 +1,162 @@
 <section class="dashboard-page">
-  <header class="dashboard-page__hero">
-    <div class="dashboard-page__identity">
-      <app-avatar-chip
-        [initials]="currentUser().initials"
-        [title]="currentUser().name"
-        [subtitle]="currentUser().role + ' · ' + currentUser().code"
-        tone="blue"
-      />
-      <div class="dashboard-page__welcome">
-        <p>Bienvenido de vuelta,</p>
-        <h2>{{ currentUser().name }}</h2>
-      </div>
-    </div>
+  <header class="dashboard-header">
+    <app-avatar-chip
+      [initials]="currentUser().initials"
+      [title]="currentUser().name"
+      [subtitle]="currentUser().role + ' / ' + currentUser().code"
+      tone="blue"
+    />
 
-    <div class="dashboard-page__clock">
-      <small>{{ libraryData.dashboardDateLabel() }}</small>
-      <strong>{{ libraryData.dashboardTimeLabel() }}</strong>
-    </div>
+    @if (isExecutiveUser()) {
+      <div class="dashboard-header__actions">
+        @if (refreshedAt()) {
+          <span>Actualizado {{ refreshedAt() | date: 'HH:mm' }}</span>
+        }
+        <app-primary-button variant="secondary" (click)="loadKpis()" [disabled]="isLoading()">
+          Actualizar
+        </app-primary-button>
+      </div>
+    }
   </header>
 
-  <section class="dashboard-page__stats" aria-label="Indicadores principales">
-    @for (stat of libraryData.dashboardStats(); track stat.label) {
-      <article class="stat-card">
-        <span class="stat-card__icon" [class]="'stat-card__icon stat-card__icon--' + stat.tone">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path [attr.d]="statIcon(stat.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </span>
-        <strong>{{ stat.value }}</strong>
-        <h3>{{ stat.label }}</h3>
-        <p>{{ stat.note }}</p>
-      </article>
-    }
-  </section>
-
-  <section class="dashboard-page__lower">
-    <article class="dashboard-panel">
-      <header class="dashboard-panel__header">
-        <div>
-          <h3>Acciones rápidas</h3>
-          <p>Entradas frecuentes para operación del sistema.</p>
-        </div>
-      </header>
-
-      <div class="quick-actions">
-        @for (action of libraryData.quickActions(); track action.title) {
-          <a class="quick-actions__item" [routerLink]="action.route">
-            <span class="quick-actions__icon" [class]="'quick-actions__icon quick-actions__icon--' + action.tone">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path [attr.d]="statIcon(action.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </span>
-            <span class="quick-actions__copy">
-              <strong>{{ action.title }}</strong>
-              <small>{{ action.description }}</small>
-            </span>
-            <span class="quick-actions__arrow" aria-hidden="true">→</span>
-          </a>
-        }
+  @if (!isExecutiveUser()) {
+    <section class="restricted-panel">
+      <div>
+        <p class="eyebrow">Vista de usuario</p>
+        <h2>Dashboard ejecutivo restringido</h2>
+        <p>
+          Los KPIs operativos estan disponibles para administradores y bibliotecarios.
+        </p>
       </div>
-    </article>
 
-    <article class="dashboard-panel dashboard-panel--activity">
-      <header class="dashboard-panel__header">
-        <div>
-          <h3>Actividad reciente</h3>
-          <p>Movimientos operativos del día actual.</p>
-        </div>
-        <span class="dashboard-panel__stamp">Actualizado ahora</span>
-      </header>
+      <nav class="student-actions" aria-label="Acciones disponibles">
+        <a routerLink="/dashboard/catalogo">Buscar libros</a>
+        <a routerLink="/dashboard/prestamos">Mis prestamos</a>
+        <a routerLink="/dashboard/reservas">Mis reservas</a>
+      </nav>
+    </section>
+  } @else {
+    @if (errorMessage()) {
+      <div class="status-banner status-banner--error">
+        {{ errorMessage() }}
+        <button type="button" (click)="loadKpis()">Reintentar</button>
+      </div>
+    }
 
-      <div class="activity-list">
-        @for (item of libraryData.recentActivity(); track item.id) {
-          <article class="activity-list__item">
-            <span class="activity-list__icon" [class]="'activity-list__icon activity-list__icon--' + item.tone">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path [attr.d]="activityIcon(item.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </span>
-            <div class="activity-list__copy">
-              <strong>{{ item.title }}</strong>
-              <p>{{ item.subtitle }}</p>
-            </div>
-            <small>{{ item.timeLabel }}</small>
+    @if (isLoading() && !kpis()) {
+      <section class="kpi-grid" aria-label="Cargando indicadores">
+        @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <article class="kpi-card kpi-card--loading">
+            <span></span>
+            <strong></strong>
+            <small></small>
           </article>
         }
-      </div>
-    </article>
-  </section>
+      </section>
+    } @else if (kpis()) {
+      <section class="kpi-grid" aria-label="Indicadores principales">
+        @for (card of kpiCards(); track card.label) {
+          <article class="kpi-card">
+            <span class="kpi-card__icon" [class]="'kpi-card__icon kpi-card__icon--' + card.tone">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  [attr.d]="statIcon(card.icon)"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <div>
+              <strong>{{ card.value }}</strong>
+              <h3>{{ card.label }}</h3>
+              <p>{{ card.note }}</p>
+            </div>
+          </article>
+        }
+      </section>
+
+      <section class="dashboard-layout">
+        <section class="chart-panel" aria-labelledby="loans-chart-title">
+          <header class="panel-header">
+            <div>
+              <p class="eyebrow">Ultimos 30 dias</p>
+              <h2 id="loans-chart-title">Prestamos por dia</h2>
+            </div>
+            <strong>{{ kpis()!.loans.totalThisMonth | number }} este mes</strong>
+          </header>
+
+          <div class="loan-chart" role="img" aria-label="Prestamos creados por dia en los ultimos 30 dias">
+            @for (point of loanChart(); track point.date) {
+              <span class="loan-chart__column">
+                <span
+                  class="loan-chart__bar"
+                  [style.height.%]="barHeight(point)"
+                  [title]="point.date + ': ' + point.total"
+                ></span>
+              </span>
+            }
+          </div>
+
+          <div class="copy-breakdown" aria-label="Estado de ejemplares">
+            <span><strong>{{ kpis()!.copies.available | number }}</strong> Disponibles</span>
+            <span><strong>{{ kpis()!.copies.loaned | number }}</strong> Prestados</span>
+            <span><strong>{{ kpis()!.copies.maintenance | number }}</strong> Mantenimiento</span>
+          </div>
+        </section>
+
+        <aside class="quick-panel" aria-labelledby="quick-actions-title">
+          <header class="panel-header">
+            <div>
+              <p class="eyebrow">Operacion</p>
+              <h2 id="quick-actions-title">Accesos rapidos</h2>
+            </div>
+          </header>
+
+          <nav class="quick-actions" aria-label="Accesos rapidos">
+            @for (action of quickActions; track action.route) {
+              <a [routerLink]="action.route">{{ action.label }}</a>
+            }
+          </nav>
+        </aside>
+      </section>
+
+      <section class="activity-panel" aria-labelledby="activity-title">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">Auditoria</p>
+            <h2 id="activity-title">Actividad reciente</h2>
+          </div>
+          <span>Ultimas {{ recentActivity().length }} operaciones</span>
+        </header>
+
+        <div class="activity-table">
+          <div class="activity-table__head" aria-hidden="true">
+            <span>Operacion</span>
+            <span>Tabla</span>
+            <span>Fecha</span>
+          </div>
+
+          @for (activity of recentActivity(); track activity.id) {
+            <article class="activity-row">
+              <span class="activity-row__status" [class]="'activity-row__status activity-row__status--' + activityTone(activity)">
+                {{ activity.action }}
+              </span>
+              <div>
+                <strong>{{ activity.summary }}</strong>
+                <small>{{ activity.recordId || 'Sin registro asociado' }}</small>
+              </div>
+              <span>{{ activity.tableName }}</span>
+              <time [attr.datetime]="activity.performedAt">
+                {{ activity.performedAt | date: 'dd/MM/yyyy HH:mm' }}
+              </time>
+            </article>
+          } @empty {
+            <p class="empty-state">Todavia no hay actividad auditada.</p>
+          }
+        </div>
+      </section>
+    }
+  }
 </section>

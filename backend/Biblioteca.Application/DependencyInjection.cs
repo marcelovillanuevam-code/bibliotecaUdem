@@ -2,6 +2,7 @@ using Biblioteca.Application.Common.Events;
 using Biblioteca.Application.Common.Services;
 using Biblioteca.Application.Interfaces.Auth;
 using Biblioteca.Application.Interfaces.Common;
+using Biblioteca.Application.Interfaces.Dashboard;
 using Biblioteca.Application.Interfaces.Libros;
 using Biblioteca.Application.Interfaces.Loans;
 using Biblioteca.Application.Interfaces.Reservations;
@@ -14,6 +15,7 @@ using Biblioteca.Application.Options;
 using Biblioteca.Application.Reservations.EventHandlers;
 using Biblioteca.Application.Services.Auth;
 using Biblioteca.Application.Services.Common;
+using Biblioteca.Application.Services.Dashboard;
 using Biblioteca.Application.Services.Fines;
 using Biblioteca.Application.Services.Libros;
 using Biblioteca.Application.Services.Loans;
@@ -48,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ILibroService, LibroService>();
         services.AddScoped<IBookCopyService, BookCopyService>();
+        services.AddScoped<IDashboardService, DashboardService>();
 
         // Shared cross-module services
         services.AddScoped<IUserEligibilityService, UserEligibilityService>();
