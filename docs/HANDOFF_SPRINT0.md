@@ -45,16 +45,16 @@ docker compose up -d
 | BUG-01 | Sin autorización por rol en endpoints | ✅ CERRADO en Lote 1 |
 | BUG-02 | Hard-delete en libros (debería ser soft) | ✅ CERRADO en Lote 2 |
 | BUG-03 | CU-07 completamente ausente (BookCopy) | ✅ CERRADO en Lote 3 |
-| BUG-04 | Exception.Message expuesto en 500 | ⏳ Pendiente Lote 7 |
+| BUG-04 | Exception.Message expuesto en 500 | ✅ CERRADO en Lote 7 |
 | BUG-05 | Google OAuth | ❌ Excluido (decisión de producto) |
 | BUG-06 | Sin JWT refresh token | ❌ Excluido (deuda técnica Sprint 1) |
-| BUG-07 | Audit log no escribe en BD | ⏳ Pendiente Lote 7 |
-| BUG-08 | EnsureReferenceData en cada Create/Update | ⏳ Pendiente Lote 7 |
-| BUG-09 | Email lookup sin índice funcional | ⏳ Pendiente Lote 7 |
-| BUG-10 | CORS hardcodeado | ⏳ Pendiente Lote 7 |
+| BUG-07 | Audit log no escribe en BD | ✅ CERRADO en Lote 7 |
+| BUG-08 | EnsureReferenceData en cada Create/Update | ✅ CERRADO en Lote 7 (residual en `AuthService.RegisterAsync` cerrado en pureba-max) |
+| BUG-09 | Email lookup sin índice funcional | ✅ CERRADO en Lote 7 (`20260507010000_AddEmailLowerIndex`) |
+| BUG-10 | CORS hardcodeado | ✅ CERRADO en Lote 7 |
 | BUG-11 | Doble AsNoTracking en LibroRepository | ✅ CERRADO en Lote 2 |
-| BUG-12 | Sin validación [Required] en DTOs | ⏳ Pendiente Lote 7 |
-| BUG-13 | Sin transacción en UsuarioService.UpdateAsync | ⏳ Pendiente Lote 7 |
+| BUG-12 | Sin validación [Required] en DTOs | ✅ CERRADO en Lote 7 |
+| BUG-13 | Sin transacción en UsuarioService.UpdateAsync | ✅ CERRADO en Lote 7 |
 | BUG-14 | GetByIdForUpdateAsync sin Include(Contacts) | ✅ CERRADO en Lote 2 (era falso positivo, ya estaba incluido) |
 
 ---
@@ -67,11 +67,13 @@ docker compose up -d
 | **Lote 1** | Autorización por rol (BUG-01) | ✅ Completado |
 | **Lote 2** | Soft-delete Libro + fix contacts (BUG-02, BUG-11, BUG-14) | ✅ Completado |
 | **Lote 3** | Entidad BookCopy backend (CU-07, BUG-03) | ✅ Completado |
-| **Lote 4** | Disponibilidad real en catálogo | ⏳ **SIGUIENTE** |
-| **Lote 5** | BookCopy Angular (CU-07 frontend) | ⏳ Pendiente |
-| **Lote 6** | JWT hardening mínimo (@udem.edu + secret seguro) | ⏳ Pendiente |
-| **Lote 7** | Hardening infraestructura (BUGs P1/P2 restantes) | ⏳ Pendiente |
-| **Lote 8** | Tests mínimos (xUnit + FluentAssertions) | ⏳ Pendiente |
+| **Lote 4** | Disponibilidad real en catálogo | ✅ Completado (mergeado como MA-4) |
+| **Lote 5** | BookCopy Angular (CU-07 frontend) | ✅ Completado |
+| **Lote 6** | JWT hardening mínimo (@udem.edu + secret seguro) | ✅ Completado |
+| **Lote 7** | Hardening infraestructura (BUGs P1/P2 restantes) | ✅ Completado |
+| **Lote 8** | Tests mínimos (xUnit + FluentAssertions) | ✅ Completado (28/28 verdes) |
+
+**Sprint 0 cerrado.** Siguiente fase: Sprint 1 (Préstamos / Devoluciones / Reservas) según `prompts/personal-prompts/PLAN_INTEGRACION.md`. Próximo lote crítico: **MX-2 Loan + LoanRenewal** (Marcelo, mergea primero porque Frank y Max dependen).
 
 ---
 
