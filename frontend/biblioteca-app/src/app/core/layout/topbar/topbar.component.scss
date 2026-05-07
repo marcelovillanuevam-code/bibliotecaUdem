@@ -112,6 +112,28 @@ h1 {
   font-size: 0.88rem;
 }
 
+.topbar__logout {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: transparent;
+  color: var(--slate-400);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #fef2f2;
+    color: #ef4444;
+  }
+
+  svg {
+    width: 1.3rem;
+  }
+}
+
 @media (min-width: 64rem) {
   .topbar__menu {
     display: none;

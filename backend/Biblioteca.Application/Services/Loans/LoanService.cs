@@ -5,6 +5,7 @@ using Biblioteca.Application.Exceptions;
 using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Libros;
 using Biblioteca.Application.Interfaces.Loans;
+using Biblioteca.Application.Interfaces.Reservations;
 using Biblioteca.Application.Interfaces.Usuarios;
 using Biblioteca.Application.Options;
 using Biblioteca.Domain.Entities;
@@ -19,6 +20,7 @@ public sealed class LoanService(
     IUsuarioRepository usuarioRepository,
     IUserEligibilityService eligibilityService,
     IReservationQueryService reservationQueryService,
+    IReservationRepository reservationRepository,
     IDomainEventDispatcher dispatcher,
     IUnitOfWork unitOfWork,
     IDateTimeProvider clock,
@@ -72,6 +74,19 @@ public sealed class LoanService(
         try
         {
             await loanRepository.AddAsync(loan, ct);
+
+            var readyReservation = await reservationRepository.GetReadyByUserAndBookForUpdateAsync(
+                request.UserId,
+                bookCopy.BookId,
+                ct);
+
+            if (readyReservation is not null)
+            {
+                readyReservation.Status = ReservationStatus.FULFILLED;
+                readyReservation.FulfilledAt = now;
+                readyReservation.FulfilledByLoanId = loan.Id;
+                await reservationRepository.UpdateAsync(readyReservation, ct);
+            }
 
             bookCopy.Status = BookCopyStatus.Loaned;
             bookCopy.UpdatedAt = now;

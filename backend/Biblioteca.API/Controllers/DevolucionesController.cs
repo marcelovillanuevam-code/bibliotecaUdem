@@ -44,7 +44,7 @@ public sealed class DevolucionesController(
             });
 
         var result = await returnService.CreateAsync(request, receivedBy, ct);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Id }, result);
+        return CreatedAtRoute("GetReturnById", new { id = result.Id }, result);
     }
 
     [HttpGet("{id:guid}", Name = "GetReturnById")]

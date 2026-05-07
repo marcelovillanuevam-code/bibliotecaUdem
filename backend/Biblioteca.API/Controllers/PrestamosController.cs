@@ -33,7 +33,7 @@ public sealed class PrestamosController(
         try
         {
             var loan = await loanService.CreateAsync(request, issuedBy, ct);
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = loan.Id }, loan);
+            return CreatedAtRoute("GetLoanById", new { id = loan.Id }, loan);
         }
         catch (LoanLimitExceededException)
         {
