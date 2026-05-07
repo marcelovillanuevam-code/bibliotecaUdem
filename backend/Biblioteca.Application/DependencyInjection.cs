@@ -5,6 +5,7 @@ using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Libros;
 using Biblioteca.Application.Interfaces.Loans;
 using Biblioteca.Application.Interfaces.Reservations;
+using Biblioteca.Application.Interfaces.Reportes;
 using Biblioteca.Application.Interfaces.Returns;
 using Biblioteca.Application.Interfaces.Usuarios;
 using Biblioteca.Application.Loans.EventHandlers;
@@ -17,6 +18,7 @@ using Biblioteca.Application.Services.Fines;
 using Biblioteca.Application.Services.Libros;
 using Biblioteca.Application.Services.Loans;
 using Biblioteca.Application.Services.Notifications;
+using Biblioteca.Application.Services.Reportes;
 using Biblioteca.Application.Services.Reservations;
 using Biblioteca.Application.Services.Returns;
 using Biblioteca.Application.Services.Usuarios;
@@ -59,6 +61,7 @@ public static class DependencyInjection
         services.AddScoped<IReturnService, ReturnService>();
         services.AddScoped<IFineService, FineService>();
         services.AddScoped<IFineConfigService, FineConfigService>();
+        services.AddScoped<IReportesService, ReportesService>();
 
         // Reservations/Notifications module
         services.AddScoped<IReservationService, ReservationService>();

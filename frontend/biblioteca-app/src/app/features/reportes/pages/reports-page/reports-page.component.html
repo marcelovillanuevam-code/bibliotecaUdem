@@ -1,0 +1,229 @@
+<section class="reports-page">
+  <header class="reports-page__header">
+    <div>
+      <h2>Reportes</h2>
+      <p>Panel de indicadores ejecutivos</p>
+    </div>
+    <button type="button" class="reports-page__export-btn" (click)="exportCsv()">
+      Exportar CSV
+    </button>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="reports-tabs" role="tablist">
+    <button
+      role="tab"
+      [class.reports-tabs__item--active]="activeTab() === 'recaudadas'"
+      class="reports-tabs__item"
+      (click)="setTab('recaudadas')">
+      Multas Recaudadas
+    </button>
+    <button
+      role="tab"
+      [class.reports-tabs__item--active]="activeTab() === 'pendientes'"
+      class="reports-tabs__item"
+      (click)="setTab('pendientes')">
+      Multas Pendientes
+    </button>
+    <button
+      role="tab"
+      [class.reports-tabs__item--active]="activeTab() === 'tardias'"
+      class="reports-tabs__item"
+      (click)="setTab('tardias')">
+      Devoluciones Tardías
+    </button>
+    <button
+      role="tab"
+      [class.reports-tabs__item--active]="activeTab() === 'condonaciones'"
+      class="reports-tabs__item"
+      (click)="setTab('condonaciones')">
+      Condonaciones
+    </button>
+  </nav>
+
+  <!-- Filtros de fecha -->
+  @if (showDateFilter()) {
+    <div class="reports-page__filters">
+      <label class="reports-filter">
+        <span>Desde</span>
+        <input type="date" [value]="fromDate()" (change)="setFromDate($any($event.target).value)" class="reports-filter__input" />
+      </label>
+      <label class="reports-filter">
+        <span>Hasta</span>
+        <input type="date" [value]="toDate()" (change)="setToDate($any($event.target).value)" class="reports-filter__input" />
+      </label>
+    </div>
+  }
+
+  <!-- Feedback -->
+  @if (errorMessage()) {
+    <div class="reports-page__feedback reports-page__feedback--error" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="reports-page__state">Cargando reporte...</div>
+  } @else {
+
+    <!-- TAB: Multas Recaudadas -->
+    @if (activeTab() === 'recaudadas') {
+      @if (recaudadas(); as d) {
+        <div class="reports-kpis">
+          <div class="reports-kpi">
+            <span class="reports-kpi__label">Total Recaudado</span>
+            <span class="reports-kpi__value">{{ formatAmount(d.totalGeneral) }}</span>
+          </div>
+          <div class="reports-kpi">
+            <span class="reports-kpi__label">Multas Pagadas</span>
+            <span class="reports-kpi__value">{{ d.totalConteo }}</span>
+          </div>
+        </div>
+
+        <div class="reports-tables">
+          <div class="reports-table-wrap">
+            <p class="reports-table-wrap__title">Por Mes</p>
+            @if (d.porMes.length === 0) {
+              <p class="reports-page__state">Sin datos en el rango seleccionado.</p>
+            } @else {
+              <table class="reports-table">
+                <thead>
+                  <tr><th>Mes</th><th>Cantidad</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                  @for (row of d.porMes; track row.mes) {
+                    <tr>
+                      <td>{{ row.mes }}</td>
+                      <td>{{ row.conteo }}</td>
+                      <td><strong>{{ formatAmount(row.total) }}</strong></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+
+          <div class="reports-table-wrap">
+            <p class="reports-table-wrap__title">Por Motivo</p>
+            @if (d.porMotivo.length === 0) {
+              <p class="reports-page__state">Sin datos en el rango seleccionado.</p>
+            } @else {
+              <table class="reports-table">
+                <thead>
+                  <tr><th>Motivo</th><th>Cantidad</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                  @for (row of d.porMotivo; track row.motivo) {
+                    <tr>
+                      <td>{{ motivoLabel(row.motivo) }}</td>
+                      <td>{{ row.conteo }}</td>
+                      <td><strong>{{ formatAmount(row.total) }}</strong></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="reports-page__state">Sin datos.</div>
+      }
+    }
+
+    <!-- TAB: Multas Pendientes -->
+    @if (activeTab() === 'pendientes') {
+      @if (pendientes().length === 0) {
+        <div class="reports-page__state">No hay multas pendientes.</div>
+      } @else {
+        <div class="reports-table-wrap">
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Cant. Multas</th>
+                <th>Total Pendiente</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of pendientes(); track d.userId) {
+                <tr>
+                  <td>{{ d.nombreUsuario }}</td>
+                  <td>{{ d.emailUsuario }}</td>
+                  <td>{{ d.cantidadMultas }}</td>
+                  <td><strong>{{ formatAmount(d.totalPendiente) }}</strong></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- TAB: Devoluciones Tardías -->
+    @if (activeTab() === 'tardias') {
+      @if (tardias(); as d) {
+        <div class="reports-kpis">
+          <div class="reports-kpi">
+            <span class="reports-kpi__label">Total Devoluciones</span>
+            <span class="reports-kpi__value">{{ d.totalDevoluciones }}</span>
+          </div>
+          <div class="reports-kpi reports-kpi--amber">
+            <span class="reports-kpi__label">Tardías</span>
+            <span class="reports-kpi__value">{{ d.totalTardias }}</span>
+          </div>
+          <div class="reports-kpi">
+            <span class="reports-kpi__label">% Tardías</span>
+            <span class="reports-kpi__value">{{ d.porcentajeTardias }}%</span>
+          </div>
+          <div class="reports-kpi">
+            <span class="reports-kpi__label">Promedio Días Retraso</span>
+            <span class="reports-kpi__value">
+              {{ d.promedioDiasRetraso != null ? d.promedioDiasRetraso + ' días' : 'N/A' }}
+            </span>
+          </div>
+        </div>
+      } @else {
+        <div class="reports-page__state">Sin datos en el rango seleccionado.</div>
+      }
+    }
+
+    <!-- TAB: Condonaciones -->
+    @if (activeTab() === 'condonaciones') {
+      @if (condonaciones().length === 0) {
+        <div class="reports-page__state">No hay condonaciones en el rango seleccionado.</div>
+      } @else {
+        <div class="reports-table-wrap">
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th>Deudor</th>
+                <th>Motivo Multa</th>
+                <th>Motivo Condonación</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Condonado Por</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of condonaciones(); track c.id) {
+                <tr>
+                  <td>
+                    <div>{{ c.nombreDeudor }}</div>
+                    <small>{{ c.emailDeudor }}</small>
+                  </td>
+                  <td>{{ motivoLabel(c.motivo) }}</td>
+                  <td>{{ c.motivoCondonacion ?? '—' }}</td>
+                  <td><strong>{{ formatAmount(c.monto) }}</strong></td>
+                  <td>{{ formatDate(c.condonadaEn) }}</td>
+                  <td>{{ c.nombreCondonador || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+  }
+</section>

@@ -42,6 +42,7 @@ public sealed class FineConfig : IEntityTypeConfiguration<Fine>
 
         builder.Property(f => f.PaidAt).HasColumnName("paid_at");
         builder.Property(f => f.PaidByUserId).HasColumnName("paid_by_user_id");
+        builder.Property(f => f.WaivedReason).HasColumnName("waived_reason").HasMaxLength(500);
         builder.Property(f => f.DeletedAt).HasColumnName("deleted_at");
 
         // Concurrency token para operaciones de pago/condonación con contención

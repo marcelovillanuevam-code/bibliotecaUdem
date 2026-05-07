@@ -300,6 +300,11 @@ namespace Biblioteca.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("paid_by_user_id");
 
+                    b.Property<string>("WaivedReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("waived_reason");
+
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(20)

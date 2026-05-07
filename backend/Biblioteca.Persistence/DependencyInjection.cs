@@ -2,6 +2,7 @@ using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Libros;
 using Biblioteca.Application.Interfaces.Loans;
 using Biblioteca.Application.Interfaces.Reservations;
+using Biblioteca.Application.Interfaces.Reportes;
 using Biblioteca.Application.Interfaces.Returns;
 using Biblioteca.Application.Interfaces.Usuarios;
 using Biblioteca.Persistence.Context;
@@ -31,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IReturnRepository, ReturnRepository>();
         services.AddScoped<IFineRepository, FineRepository>();
         services.AddScoped<IFineConfigRepository, FineConfigRepository>();
+        services.AddScoped<IReportesRepository, ReportesRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IDatabaseSeeder, StatusesSeeder>();

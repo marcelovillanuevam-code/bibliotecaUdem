@@ -54,6 +54,7 @@ public sealed class FineService(
         fine.Status = FineStatus.WAIVED;
         fine.PaidAt = DateTime.UtcNow;
         fine.PaidByUserId = waivedBy;
+        fine.WaivedReason = request.Reason;
 
         await fineRepository.UpdateAsync(fine, ct);
 
