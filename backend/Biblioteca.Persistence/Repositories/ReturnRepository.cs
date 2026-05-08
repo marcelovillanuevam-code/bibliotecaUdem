@@ -7,11 +7,20 @@ namespace Biblioteca.Persistence.Repositories;
 
 public sealed class ReturnRepository(BibliotecaDbContext dbContext) : IReturnRepository
 {
+    private static IQueryable<Return> WithDetails(IQueryable<Return> query) =>
+        query
+            .Include(r => r.Loan)!.ThenInclude(l => l!.User)!.ThenInclude(u => u!.Profile)
+            .Include(r => r.Loan)!.ThenInclude(l => l!.User)!.ThenInclude(u => u!.Contacts)
+            .Include(r => r.Loan)!.ThenInclude(l => l!.BookCopy)!.ThenInclude(bc => bc!.Book)
+            .Include(r => r.Fine);
+
+    public async Task<List<Return>> ListAsync(CancellationToken ct) =>
+        await WithDetails(dbContext.Returns.AsNoTracking())
+            .OrderByDescending(r => r.ReturnedAt)
+            .ToListAsync(ct);
+
     public async Task<Return?> GetByIdAsync(Guid id, CancellationToken ct) =>
-        await dbContext.Returns
-            .AsNoTracking()
-            .Include(r => r.Loan)
-            .Include(r => r.Fine)
+        await WithDetails(dbContext.Returns.AsNoTracking())
             .FirstOrDefaultAsync(r => r.Id == id, ct);
 
     public async Task<Return?> GetByLoanAsync(Guid loanId, CancellationToken ct) =>

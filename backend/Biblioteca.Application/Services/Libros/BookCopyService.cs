@@ -46,7 +46,7 @@ public sealed class BookCopyService(
             LocationId = request.LocationId,
             Status = NormalizeStatus(request.Status),
             Condition = NormalizeCondition(request.Condition),
-            AcquiredAt = request.AcquiredAt == default ? now : request.AcquiredAt,
+            AcquiredAt = NormalizeAcquiredAt(request.AcquiredAt, now),
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -88,6 +88,19 @@ public sealed class BookCopyService(
             : BookCopyStatus.IsValid(status.Trim())
                 ? status.Trim().ToUpperInvariant()
                 : throw new ValidationException("Estado no válido. Valores permitidos: AVAILABLE, MAINTENANCE, LOST, RETIRED.");
+
+    private static DateTime NormalizeAcquiredAt(DateTime acquiredAt, DateTime fallbackUtc)
+    {
+        if (acquiredAt == default)
+            return fallbackUtc;
+
+        return acquiredAt.Kind switch
+        {
+            DateTimeKind.Utc => acquiredAt,
+            DateTimeKind.Local => acquiredAt.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(acquiredAt, DateTimeKind.Utc)
+        };
+    }
 
     private static string? NormalizeCondition(string? condition) =>
         string.IsNullOrWhiteSpace(condition)

@@ -7,4 +7,8 @@ public sealed record ReturnDto(
     string Condition,
     string? InspectionNotes,
     Guid ReceivedByUserId,
+    string? BookTitle,
+    string? CopyBarcode,
+    string? BorrowerName,
+    string? BorrowerEmail,
     IReadOnlyCollection<FineDto> Fines);

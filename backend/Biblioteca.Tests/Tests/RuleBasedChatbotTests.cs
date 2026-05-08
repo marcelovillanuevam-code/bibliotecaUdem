@@ -65,7 +65,7 @@ public sealed class RuleBasedChatbotTests
         public Task<Loan?> GetByIdForUpdateAsync(Guid id, CancellationToken ct) => throw new NotImplementedException();
         public Task<Loan?> GetActiveByBookCopyAsync(Guid bookCopyId, CancellationToken ct) => throw new NotImplementedException();
         public Task<IReadOnlyCollection<Loan>> GetActiveByUserAsync(Guid userId, CancellationToken ct) => throw new NotImplementedException();
-        public Task<IReadOnlyCollection<Loan>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct) => throw new NotImplementedException();
+        public Task<IReadOnlyCollection<Loan>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct, string? copyBarcode = null) => throw new NotImplementedException();
         public Task<Loan> AddAsync(Loan loan, CancellationToken ct) => throw new NotImplementedException();
         public Task UpdateAsync(Loan loan, CancellationToken ct) => throw new NotImplementedException();
         public Task<int> CountActiveByUserAsync(Guid userId, CancellationToken ct) => throw new NotImplementedException();
@@ -131,8 +131,8 @@ public sealed class RuleBasedChatbotTests
         res.Reply.Should().Contain("Harry Potter");
         res.Reply.Should().Contain("J.K. Rowling");
         res.Actions.Should().HaveCount(1);
-        res.Actions![0].Label.Should().Contain("Harry Potter");
-        res.Actions[0].Url.Should().Be("/dashboard/catalogo");
+        res.Actions!.First().Label.Should().Contain("Harry Potter");
+        res.Actions.First().Url.Should().Be("/dashboard/catalogo");
     }
 
     [Fact]
@@ -258,12 +258,75 @@ public sealed class RuleBasedChatbotTests
         res.Reply.Should().Contain("biblioteca@udem.edu");
     }
 
+    // ── Tests: saludos ────────────────────────────────────────────────────────
+
+    [Theory]
+    [InlineData("hola")]
+    [InlineData("Hola")]
+    [InlineData("HOLA")]
+    [InlineData("hi")]
+    [InlineData("hey")]
+    [InlineData("buenas")]
+    [InlineData("buenos días")]
+    [InlineData("buenas tardes")]
+    [InlineData("buenas noches")]
+    [InlineData("  hola  ")]
+    public async Task Saludo_devuelve_bienvenida_con_lista_de_comandos(string input)
+    {
+        var res = await Build().AskAsync(input, UserId, default);
+
+        res.Reply.Should().Contain("Biblioteca UDEM");
+        res.Reply.Should().Contain("buscar");
+        res.Reply.Should().Contain("mis préstamos");
+        res.Reply.Should().Contain("mis multas");
+        res.Actions.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Saludo_menciona_el_comando_ayuda()
+    {
+        var res = await Build().AskAsync("hola", UserId, default);
+
+        res.Reply.Should().Contain("ayuda");
+    }
+
+    // ── Tests: ayuda ──────────────────────────────────────────────────────────
+
+    [Theory]
+    [InlineData("ayuda")]
+    [InlineData("Ayuda")]
+    [InlineData("AYUDA")]
+    [InlineData("help")]
+    [InlineData("comandos")]
+    [InlineData("que puedes hacer")]
+    [InlineData("qué puedes hacer")]
+    [InlineData("hola que puedes hacer")]
+    public async Task Ayuda_devuelve_lista_de_comandos_con_ejemplos(string input)
+    {
+        var res = await Build().AskAsync(input, UserId, default);
+
+        res.Reply.Should().Contain("buscar Harry Potter");
+        res.Reply.Should().Contain("mis préstamos");
+        res.Reply.Should().Contain("mis multas");
+        res.Actions.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Ayuda_incluye_todos_los_comandos()
+    {
+        var res = await Build().AskAsync("ayuda", UserId, default);
+
+        res.Reply.Should().Contain("horario");
+        res.Reply.Should().Contain("ubicación");
+        res.Reply.Should().Contain("contacto");
+    }
+
     // ── Tests: default ────────────────────────────────────────────────────────
 
     [Fact]
     public async Task Mensaje_desconocido_devuelve_lista_de_comandos()
     {
-        var res = await Build().AskAsync("hola que tal", UserId, default);
+        var res = await Build().AskAsync("texto completamente desconocido xyz", UserId, default);
 
         res.Reply.Should().Contain("No entendí");
         res.Reply.Should().Contain("buscar");

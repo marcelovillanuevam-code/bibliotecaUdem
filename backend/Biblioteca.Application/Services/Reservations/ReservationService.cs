@@ -5,6 +5,7 @@ using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Libros;
 using Biblioteca.Application.Interfaces.Reservations;
 using Biblioteca.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace Biblioteca.Application.Services.Reservations;
 
@@ -13,7 +14,8 @@ public sealed class ReservationService(
     INotificationRepository notificationRepository,
     IBookCopyRepository bookCopyRepository,
     IUserEligibilityService eligibilityService,
-    IDateTimeProvider clock) : IReservationService
+    IDateTimeProvider clock,
+    ILogger<ReservationService> logger) : IReservationService
 {
     public async Task<ReservationDto> CreateAsync(Guid userId, CreateReservationRequest request, CancellationToken ct)
     {
@@ -44,19 +46,26 @@ public sealed class ReservationService(
 
         var saved = await reservationRepository.AddAsync(reservation, ct);
 
-        var notification = new Notification
+        try
         {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            Type = NotificationType.RESERVATION_READY,
-            Channel = NotificationChannel.IN_APP,
-            Subject = "Reserva confirmada",
-            Body = $"Tu reserva fue registrada en posición {reservation.QueuePosition}.",
-            Status = NotificationStatus.PENDING,
-            CreatedAt = now,
-            PayloadJson = JsonSerializer.Serialize(new { reservationId = reservation.Id, bookId = request.BookId })
-        };
-        await notificationRepository.AddAsync(notification, ct);
+            var notification = new Notification
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Type = NotificationType.RESERVATION_READY,
+                Channel = NotificationChannel.IN_APP,
+                Subject = "Reserva confirmada",
+                Body = $"Tu reserva fue registrada en posición {reservation.QueuePosition}.",
+                Status = NotificationStatus.PENDING,
+                CreatedAt = now,
+                PayloadJson = JsonSerializer.Serialize(new { reservationId = reservation.Id, bookId = request.BookId })
+            };
+            await notificationRepository.AddAsync(notification, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error al crear notificación para reserva {ReservationId}.", reservation.Id);
+        }
 
         return MapToDto(saved);
     }

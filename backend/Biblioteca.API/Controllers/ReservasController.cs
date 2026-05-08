@@ -28,7 +28,7 @@ public sealed class ReservasController(
             return Unauthorized();
 
         var reservation = await reservationService.CreateAsync(userId, request, ct);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = reservation.Id }, reservation);
+        return CreatedAtRoute("GetReservationById", new { id = reservation.Id }, reservation);
     }
 
     [HttpGet("{id:guid}", Name = "GetReservationById")]

@@ -66,6 +66,15 @@ public sealed class ReservationRepository(BibliotecaDbContext dbContext) : IRese
                 (r.Status == ReservationStatus.PENDING || r.Status == ReservationStatus.READY),
                 ct);
 
+    public async Task<Reservation?> GetReadyByUserAndBookForUpdateAsync(
+        Guid userId, Guid bookId, CancellationToken ct) =>
+        await dbContext.Reservations
+            .FirstOrDefaultAsync(r =>
+                r.UserId == userId &&
+                r.BookId == bookId &&
+                r.Status == ReservationStatus.READY,
+                ct);
+
     public async Task<Reservation?> GetNextInQueueAsync(Guid bookId, CancellationToken ct) =>
         await dbContext.Reservations
             .AsNoTracking()

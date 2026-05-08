@@ -24,6 +24,7 @@ export interface ReturnRecord {
   copyBarcode: string | null;
   borrowerName: string | null;
   borrowerEmail: string | null;
+  fines?: Array<{ id: string; reason: string; amount: number }>;
 }
 
 export interface ReturnResult {

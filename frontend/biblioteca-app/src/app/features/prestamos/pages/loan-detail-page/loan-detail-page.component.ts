@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,6 +5,7 @@ import { AuthSessionService } from '../../../../core/services/auth-session.servi
 import { LoansApiService } from '../../../../core/services/loans-api.service';
 import { LoanRecord, LoanStatus } from '../../../../shared/models/loan.model';
 import { AccentTone } from '../../../../shared/models/user.model';
+import { resolveHttpError } from '../../../../shared/utils/http-error';
 import { PrimaryButtonComponent } from '../../../../shared/ui/primary-button/primary-button.component';
 import { StatusBadgeComponent } from '../../../../shared/ui/status-badge/status-badge.component';
 
@@ -65,7 +65,7 @@ export class LoanDetailPageComponent {
         },
         error: (error: unknown) => {
           this.renewing.set(false);
-          this.showToast(this.resolveErrorMessage(error, 'No fue posible renovar el prestamo.'), 'error');
+          this.showToast(resolveHttpError(error, 'No fue posible renovar el prestamo.'), 'error');
         }
       });
   }
@@ -137,7 +137,7 @@ export class LoanDetailPageComponent {
           this.loading.set(false);
         },
         error: (error: unknown) => {
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar el prestamo.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible cargar el prestamo.'));
           this.loading.set(false);
         }
       });
@@ -155,13 +155,5 @@ export class LoanDetailPageComponent {
     return message ? { tone: 'success', message } : null;
   }
 
-  private resolveErrorMessage(error: unknown, fallbackMessage: string): string {
-    if (error instanceof HttpErrorResponse) {
-      const detail = error.error?.detail as string | undefined;
-      const title = error.error?.title as string | undefined;
-      return detail || title || fallbackMessage;
-    }
-
-    return fallbackMessage;
-  }
 }
+

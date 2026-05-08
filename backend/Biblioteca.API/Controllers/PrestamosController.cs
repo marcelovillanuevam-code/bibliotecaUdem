@@ -1,5 +1,6 @@
 using Biblioteca.API.Extensions;
 using Biblioteca.Application.DTOs.Prestamos;
+using Biblioteca.Application.Exceptions;
 using Biblioteca.Application.Features.Prestamos;
 using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Loans;
@@ -21,7 +22,7 @@ public sealed class PrestamosController(
     [Authorize(Policy = AuthPolicies.AdminOrLibrarian)]
     [ProducesResponseType(typeof(LoanDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<LoanDto>> CreateAsync(
         [FromBody] CreateLoanRequest request,
         CancellationToken ct)
@@ -29,8 +30,15 @@ public sealed class PrestamosController(
         if (currentUserService.CurrentUserId is not { } issuedBy)
             return Unauthorized();
 
-        var loan = await loanService.CreateAsync(request, issuedBy, ct);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = loan.Id }, loan);
+        try
+        {
+            var loan = await loanService.CreateAsync(request, issuedBy, ct);
+            return CreatedAtRoute("GetLoanById", new { id = loan.Id }, loan);
+        }
+        catch (LoanLimitExceededException)
+        {
+            return Conflict(new { error = "Límite de préstamos alcanzado para este rol" });
+        }
     }
 
     [HttpGet("{id:guid}", Name = "GetLoanById")]
@@ -54,13 +62,14 @@ public sealed class PrestamosController(
     [ProducesResponseType(typeof(IReadOnlyCollection<LoanDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyCollection<LoanDto>>> GetAllAsync(
         [FromQuery] string? status,
+        [FromQuery] string? copyBarcode,
         CancellationToken ct)
     {
         LoanStatus? statusFilter = null;
         if (status is not null && Enum.TryParse<LoanStatus>(status, ignoreCase: true, out var parsed))
             statusFilter = parsed;
 
-        var loans = await loanService.GetAllAsync(statusFilter, ct);
+        var loans = await loanService.GetAllAsync(statusFilter, ct, copyBarcode?.Trim());
         return Ok(loans);
     }
 

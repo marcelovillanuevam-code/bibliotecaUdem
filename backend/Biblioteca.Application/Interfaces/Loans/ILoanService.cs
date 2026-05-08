@@ -10,6 +10,6 @@ public interface ILoanService
     Task<LoanDto?> GetByIdAsync(Guid id, CancellationToken ct);
     Task<IReadOnlyCollection<LoanDto>> GetActiveByUserAsync(Guid userId, CancellationToken ct);
     Task<IReadOnlyCollection<LoanDto>> GetByUserAsync(Guid userId, LoanStatus? statusFilter, CancellationToken ct);
-    Task<IReadOnlyCollection<LoanDto>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct);
+    Task<IReadOnlyCollection<LoanDto>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct, string? copyBarcode = null);
     Task MarkOverdueAsync(CancellationToken ct);
 }

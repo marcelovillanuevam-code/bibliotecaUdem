@@ -18,6 +18,12 @@ public sealed class ReturnService(
     IUnitOfWork unitOfWork,
     IDateTimeProvider clock) : IReturnService
 {
+    public async Task<List<ReturnDto>> ListAsync(CancellationToken ct)
+    {
+        var returns = await returnRepository.ListAsync(ct);
+        return returns.Select(r => MapToDto(r, r.Fine is not null ? [r.Fine] : [])).ToList();
+    }
+
     public async Task<ReturnDto> CreateAsync(CreateReturnRequest request, Guid receivedBy, CancellationToken ct)
     {
         var loan = await loanRepository.GetByIdForUpdateAsync(request.LoanId, ct)
@@ -103,5 +109,29 @@ public sealed class ReturnService(
         r.Condition.ToString(),
         r.InspectionNotes,
         r.ReceivedByUserId,
+        r.Loan?.BookCopy?.Book?.Title,
+        r.Loan?.BookCopy?.Barcode,
+        BorrowerName(r.Loan?.User),
+        BorrowerEmail(r.Loan?.User),
         fines.Select(f => new FineDto(f.Id, f.ReturnId, f.UserId, f.Reason.ToString(), f.Amount, f.DaysLate, f.Status.ToString(), f.CreatedAt, f.PaidAt, f.PaidByUserId)).ToList());
+
+    private static string? BorrowerName(Usuario? user)
+    {
+        if (user is null)
+            return null;
+
+        if (user.Profile is not { } profile)
+            return user.Username;
+
+        return string.IsNullOrWhiteSpace(profile.DisplayName)
+            ? $"{profile.FirstName} {profile.LastName}".Trim()
+            : profile.DisplayName;
+    }
+
+    private static string? BorrowerEmail(Usuario? user) =>
+        user?.Contacts
+            .Where(contact => contact.Type.Equals("email", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(contact => contact.IsPrimary)
+            .Select(contact => contact.Value)
+            .FirstOrDefault();
 }

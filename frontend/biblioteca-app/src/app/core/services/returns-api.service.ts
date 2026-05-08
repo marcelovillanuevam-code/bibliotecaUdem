@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoanSummary, RegisterReturnRequest, ReturnRecord, ReturnResult } from '../../shared/models/return.model';
 
@@ -24,6 +24,15 @@ export class ReturnsApiService {
   }
 
   registerReturn(request: RegisterReturnRequest): Observable<ReturnResult> {
-    return this.http.post<ReturnResult>(`${environment.apiBaseUrl}/devoluciones`, request);
+    return this.http.post<ReturnRecord>(`${environment.apiBaseUrl}/devoluciones`, request).pipe(
+      map((returnRecord) => ({
+        return: returnRecord,
+        finesGenerated: returnRecord.fines?.map((fine) => ({
+          id: fine.id,
+          reason: fine.reason,
+          amount: fine.amount
+        })) ?? []
+      }))
+    );
   }
 }

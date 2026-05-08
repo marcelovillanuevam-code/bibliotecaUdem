@@ -100,7 +100,12 @@ export class AuthSessionService {
     }
 
     try {
-      return JSON.parse(rawSession) as StoredSession;
+      const stored = JSON.parse(rawSession) as StoredSession;
+      if (stored.expiresAtUtc && new Date(stored.expiresAtUtc) <= new Date()) {
+        localStorage.removeItem(AuthSessionService.storageKey);
+        return null;
+      }
+      return stored;
     } catch {
       localStorage.removeItem(AuthSessionService.storageKey);
       return null;

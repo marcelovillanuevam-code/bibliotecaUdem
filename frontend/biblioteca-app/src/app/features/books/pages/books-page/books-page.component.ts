@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -16,6 +15,7 @@ import { BookCopiesApiService } from '../../../../core/services/book-copies-api.
 import { FinesApiService } from '../../../../core/services/fines-api.service';
 import { ReservationsApiService } from '../../../../core/services/reservations-api.service';
 import { BookDetail, BookFilters, BookRecord, BookSaveRequest } from '../../../../shared/models/book.model';
+import { resolveHttpError } from '../../../../shared/utils/http-error';
 import { BookCopy, BookCopyCondition, BookCopySaveRequest, BookCopyStatus, BookCopyUpdateRequest } from '../../../../shared/models/book-copy.model';
 import { Reservation } from '../../../../shared/models/reservation.model';
 import { PrimaryButtonComponent } from '../../../../shared/ui/primary-button/primary-button.component';
@@ -268,7 +268,7 @@ export class BooksPageComponent {
         },
         error: (error: unknown) => {
           this.reservingBookId.set(null);
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible crear la reserva.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible crear la reserva.'));
           this.loadReservationContext();
         }
       });
@@ -291,7 +291,7 @@ export class BooksPageComponent {
           this.detailLoading.set(false);
         },
         error: (error: unknown) => {
-          this.detailErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible consultar el libro seleccionado.'));
+          this.detailErrorMessage.set(resolveHttpError(error, 'No fue posible consultar el libro seleccionado.'));
           this.detailLoading.set(false);
         }
       });
@@ -361,7 +361,7 @@ export class BooksPageComponent {
         error: (error: unknown) => {
           this.editorForm.enable();
           this.editorLoading.set(false);
-          this.editorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar el libro para edicion.'));
+          this.editorErrorMessage.set(resolveHttpError(error, 'No fue posible cargar el libro para edicion.'));
         }
       });
   }
@@ -408,7 +408,7 @@ export class BooksPageComponent {
           },
           error: (error: unknown) => {
             this.editorSaving.set(false);
-            this.editorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible registrar el libro.'));
+            this.editorErrorMessage.set(resolveHttpError(error, 'No fue posible registrar el libro.'));
           }
         });
 
@@ -438,7 +438,7 @@ export class BooksPageComponent {
         },
         error: (error: unknown) => {
           this.editorSaving.set(false);
-          this.editorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible actualizar el libro.'));
+          this.editorErrorMessage.set(resolveHttpError(error, 'No fue posible actualizar el libro.'));
         }
       });
   }
@@ -473,7 +473,7 @@ export class BooksPageComponent {
         },
         error: (error: unknown) => {
           this.deletingBookId.set(null);
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible dar de baja el libro seleccionado.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible dar de baja el libro seleccionado.'));
         }
       });
   }
@@ -580,7 +580,7 @@ export class BooksPageComponent {
           },
           error: (error: unknown) => {
             this.copyEditorSaving.set(false);
-            this.copyEditorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible agregar el ejemplar.'));
+            this.copyEditorErrorMessage.set(resolveHttpError(error, 'No fue posible agregar el ejemplar.'));
           }
         });
       return;
@@ -609,7 +609,7 @@ export class BooksPageComponent {
         },
         error: (error: unknown) => {
           this.copyEditorSaving.set(false);
-          this.copyEditorErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible actualizar el ejemplar.'));
+          this.copyEditorErrorMessage.set(resolveHttpError(error, 'No fue posible actualizar el ejemplar.'));
         }
       });
   }
@@ -630,7 +630,7 @@ export class BooksPageComponent {
           this.refreshBookCounts(bookId);
         },
         error: (error: unknown) => {
-          this.copiesErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible dar de baja el ejemplar.'));
+          this.copiesErrorMessage.set(resolveHttpError(error, 'No fue posible dar de baja el ejemplar.'));
         }
       });
   }
@@ -795,7 +795,7 @@ export class BooksPageComponent {
           this.loading.set(false);
         },
         error: (error: unknown) => {
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar los libros desde la API.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible cargar los libros desde la API.'));
           this.loading.set(false);
         }
       });
@@ -831,7 +831,7 @@ export class BooksPageComponent {
           this.activeReservations.set([]);
           this.pendingFinesCount.set(0);
           this.reservationContextLoading.set(false);
-          this.errorMessage.set(this.resolveErrorMessage(error, 'No fue posible validar reservas o multas pendientes.'));
+          this.errorMessage.set(resolveHttpError(error, 'No fue posible validar reservas o multas pendientes.'));
         }
       });
   }
@@ -852,7 +852,7 @@ export class BooksPageComponent {
           this.copiesLoading.set(false);
         },
         error: (error: unknown) => {
-          this.copiesErrorMessage.set(this.resolveErrorMessage(error, 'No fue posible cargar los ejemplares.'));
+          this.copiesErrorMessage.set(resolveHttpError(error, 'No fue posible cargar los ejemplares.'));
           this.copiesLoading.set(false);
         }
       });
@@ -1005,13 +1005,5 @@ export class BooksPageComponent {
     }
   }
 
-  private resolveErrorMessage(error: unknown, fallbackMessage: string): string {
-    if (error instanceof HttpErrorResponse) {
-      const detail = error.error?.detail as string | undefined;
-      const title = error.error?.title as string | undefined;
-      return detail || title || fallbackMessage;
-    }
-
-    return fallbackMessage;
-  }
 }
+

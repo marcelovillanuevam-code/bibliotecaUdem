@@ -13,4 +13,5 @@ export class TopbarComponent {
   readonly user = input.required<CurrentUser>();
   readonly pendingFinesCount = input(0);
   readonly menuToggle = output<void>();
+  readonly logoutRequest = output<void>();
 }

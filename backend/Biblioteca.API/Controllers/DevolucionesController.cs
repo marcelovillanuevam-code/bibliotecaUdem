@@ -16,6 +16,15 @@ public sealed class DevolucionesController(
     IReturnService returnService,
     ICurrentUserService currentUserService) : ControllerBase
 {
+    [HttpGet]
+    [Authorize(Policy = AuthPolicies.AdminOrLibrarian)]
+    [ProducesResponseType(typeof(IReadOnlyCollection<ReturnDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyCollection<ReturnDto>>> ListAsync(CancellationToken ct)
+    {
+        var results = await returnService.ListAsync(ct);
+        return Ok(results);
+    }
+
     [HttpPost]
     [Authorize(Policy = AuthPolicies.AdminOrLibrarian)]
     [ProducesResponseType(typeof(ReturnDto), StatusCodes.Status201Created)]
@@ -28,8 +37,14 @@ public sealed class DevolucionesController(
         if (currentUserService.CurrentUserId is not { } receivedBy)
             return Unauthorized();
 
+        if (request.LoanId == Guid.Empty)
+            return BadRequest(new ProblemDetails
+            {
+                Detail = "El campo loanId es obligatorio y debe ser un GUID válido."
+            });
+
         var result = await returnService.CreateAsync(request, receivedBy, ct);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Id }, result);
+        return CreatedAtRoute("GetReturnById", new { id = result.Id }, result);
     }
 
     [HttpGet("{id:guid}", Name = "GetReturnById")]

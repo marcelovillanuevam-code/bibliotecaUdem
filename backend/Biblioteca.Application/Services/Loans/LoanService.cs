@@ -5,9 +5,11 @@ using Biblioteca.Application.Exceptions;
 using Biblioteca.Application.Interfaces.Common;
 using Biblioteca.Application.Interfaces.Libros;
 using Biblioteca.Application.Interfaces.Loans;
+using Biblioteca.Application.Interfaces.Reservations;
 using Biblioteca.Application.Interfaces.Usuarios;
 using Biblioteca.Application.Options;
 using Biblioteca.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Biblioteca.Application.Services.Loans;
@@ -18,10 +20,12 @@ public sealed class LoanService(
     IUsuarioRepository usuarioRepository,
     IUserEligibilityService eligibilityService,
     IReservationQueryService reservationQueryService,
+    IReservationRepository reservationRepository,
     IDomainEventDispatcher dispatcher,
     IUnitOfWork unitOfWork,
     IDateTimeProvider clock,
-    IOptions<LoansOptions> loansOptions) : ILoanService
+    IOptions<LoansOptions> loansOptions,
+    ILogger<LoanService> logger) : ILoanService
 {
     private const int MaxRenewals = 2;
     private const int RenewalDays = 7;
@@ -39,7 +43,7 @@ public sealed class LoanService(
         var maxActive = loansOptions.Value.GetMaxActive(userRole);
         var activeCount = await loanRepository.CountActiveByUserAsync(request.UserId, ct);
         if (activeCount >= maxActive)
-            throw new ConflictException($"El usuario ha alcanzado el máximo de {maxActive} préstamos activos para su rol.");
+            throw new LoanLimitExceededException();
 
         var bookCopy = await bookCopyRepository.GetByIdForUpdateAsync(request.BookCopyId, ct)
             ?? throw new NotFoundException("Ejemplar no encontrado.");
@@ -71,11 +75,22 @@ public sealed class LoanService(
         {
             await loanRepository.AddAsync(loan, ct);
 
+            var readyReservation = await reservationRepository.GetReadyByUserAndBookForUpdateAsync(
+                request.UserId,
+                bookCopy.BookId,
+                ct);
+
+            if (readyReservation is not null)
+            {
+                readyReservation.Status = ReservationStatus.FULFILLED;
+                readyReservation.FulfilledAt = now;
+                readyReservation.FulfilledByLoanId = loan.Id;
+                await reservationRepository.UpdateAsync(readyReservation, ct);
+            }
+
             bookCopy.Status = BookCopyStatus.Loaned;
             bookCopy.UpdatedAt = now;
             await bookCopyRepository.SaveChangesAsync(ct);
-
-            await dispatcher.DispatchAsync(new LoanCreated(loan.Id, loan.UserId, loan.BookCopyId, bookCopy.BookId, loan.DueAt), ct);
 
             await unitOfWork.CommitAsync(ct);
         }
@@ -83,6 +98,15 @@ public sealed class LoanService(
         {
             await unitOfWork.RollbackAsync(ct);
             throw;
+        }
+
+        try
+        {
+            await dispatcher.DispatchAsync(new LoanCreated(loan.Id, loan.UserId, bookCopy.BookId, loan.BookCopyId, loan.DueAt), ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error al despachar LoanCreated para préstamo {LoanId}.", loan.Id);
         }
 
         return await GetByIdAsync(loan.Id, ct) ?? throw new InvalidOperationException("Error al recuperar el préstamo creado.");
@@ -144,9 +168,9 @@ public sealed class LoanService(
         return loans.Select(MapToDto).ToList();
     }
 
-    public async Task<IReadOnlyCollection<LoanDto>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct)
+    public async Task<IReadOnlyCollection<LoanDto>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct, string? copyBarcode = null)
     {
-        var loans = await loanRepository.GetAllAsync(statusFilter, ct);
+        var loans = await loanRepository.GetAllAsync(statusFilter, ct, copyBarcode);
         return loans.Select(MapToDto).ToList();
     }
 
@@ -190,5 +214,8 @@ public sealed class LoanService(
                 r.PreviousDueAt,
                 r.NewDueAt,
                 r.RenewedByUserId))
-            .ToList());
+            .ToList(),
+        CopyBarcode: l.BookCopy?.Barcode ?? "N/A",
+        BorrowerName: l.User?.Profile is { } prof ? $"{prof.FirstName} {prof.LastName}".Trim() : "N/A",
+        BorrowerEmail: l.User?.Username ?? "N/A");
 }

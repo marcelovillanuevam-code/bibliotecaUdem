@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Biblioteca.API.Services;
 using Biblioteca.Application.Interfaces.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,7 +15,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         services.AddProblemDetails();
-        services.AddControllers();
+        services.AddControllers()
+            .AddJsonOptions(o =>
+                o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {

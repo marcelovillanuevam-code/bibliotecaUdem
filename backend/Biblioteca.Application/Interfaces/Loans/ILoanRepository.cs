@@ -9,7 +9,7 @@ public interface ILoanRepository
     Task<Loan?> GetActiveByBookCopyAsync(Guid bookCopyId, CancellationToken ct);
     Task<IReadOnlyCollection<Loan>> GetActiveByUserAsync(Guid userId, CancellationToken ct);
     Task<IReadOnlyCollection<Loan>> GetByUserAsync(Guid userId, LoanStatus? statusFilter, CancellationToken ct);
-    Task<IReadOnlyCollection<Loan>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct);
+    Task<IReadOnlyCollection<Loan>> GetAllAsync(LoanStatus? statusFilter, CancellationToken ct, string? copyBarcode = null);
     Task<Loan> AddAsync(Loan loan, CancellationToken ct);
     Task UpdateAsync(Loan loan, CancellationToken ct);
     Task<int> CountActiveByUserAsync(Guid userId, CancellationToken ct);
